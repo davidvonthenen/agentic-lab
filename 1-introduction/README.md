@@ -373,4 +373,4 @@ You now have a shared network, a reproducible Python workspace, and separate con
 
 A successful Episode 1 run means the infrastructure and model requests passed.
 
-Continue with **Episode 2: News Expert** from the [workshop episode index](../README.md#2-episodes). Keep this stack available: the next episode adds historical news evidence and current news tools to the environment you prepared here.
+Continue to [Episode 2: News Exper](../2-news-agent/README.md), , or return to the [workshop episode index](../README.md#episodes). 
