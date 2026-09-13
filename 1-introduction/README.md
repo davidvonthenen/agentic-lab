@@ -29,9 +29,9 @@ Later, **MCP** connects each specialist to bounded tools and data. **A2A** conne
 
 ### Before you begin
 
-Install [Podman Desktop](https://podman-desktop.io/docs/installation) or Podman for your operating system. Enable a Compose provider using the [Podman Desktop Compose setup](https://podman-desktop.io/docs/compose/setting-up-compose). `podman compose` delegates to an external provider such as Docker Compose or `podman-compose`; installing Podman alone does not always install that provider. [Reference](https://docs.podman.io/en/latest/markdown/podman-compose.1.html)
+Install [Podman Desktop](https://podman-desktop.io/docs/installation). Enable a Compose provider using the [Podman Desktop Compose setup](https://podman-desktop.io/docs/compose/setting-up-compose). `podman compose` delegates to an external provider such as Docker Compose or `podman-compose`; installing Podman alone does not always install that provider. [Reference](https://docs.podman.io/en/latest/markdown/podman-compose.1.html)
 
-You also need an OpenAI API key, or a Nebius API key for the optional configuration, with access to the chosen models and available API quota. Model validation sends small paid requests. Internet access is needed for the container images, repository clone, Python packages, model API calls, and the first embedding-model download. Tavily and Finnhub keys are **not required for Episode 1**.
+You also need an [OpenAI API key](https://platform.openai.com/) (or an OpenAI-compatible service, such as [Nebius TokenFactory](https://tokenfactory.nebius.com/)), a [FinnHub API key](https://finnhub.io/), and a [Tavily API key](https://www.tavily.com/), for the optional configuration, with access to the chosen models and available API quota. Model validation sends small paid requests. Internet access is needed for the container images, repository clone, Python packages, model API calls, and the first embedding-model download. Tavily and Finnhub keys are **not required for Episode 1**.
 
 For planning purposes, reserve roughly **4 CPU cores, 8 GiB of memory, and 30 GiB of free disk space** for the container environment. These are suggested workshop allocations, not measured minimum requirements. A machine with 16 GiB of total RAM should be sufficient for the operating system and all processes within this lab.
 
@@ -94,11 +94,7 @@ Keep this host terminal in that directory for all `podman compose` commands. It 
 
 The runtime image clones the workshop repository configured by its publisher. On first startup it copies that checkout into a persistent workspace at `/workspace/agentic-rag`. This is a **separate checkout from the host directory**. Editing a host source file does not automatically change the container's copy.
 
-## Step 2: obtain a Tavily and FinnHub API Key
-
-TODO: 
-
-## Step 3: choose your external inference provider
+## Step 2: choose your external inference provider
 
 Choose **one** of the following configurations. The `.env` file stays on the host. Compose reads its values and explicitly passes the supported variables to the `lab` container when creating it. Every later `exec` session inherits those variables; API keys are not baked into the image.
 
@@ -208,7 +204,7 @@ For a third-party service, use `USE_EXTERNAL_AI=true` and set the URL, key, mode
 
 Compatibility is not identical behavior. Models differ in sampling parameters, token limits, structured output, reasoning behavior, and access controls. The archived clients send `max_tokens`, `temperature`, and-in several calls-`top_p`. OpenAI documents `max_tokens` as deprecated in favor of `max_completion_tokens`. The validator intentionally tests the parameters that the source actually sends; it does not hide a mismatch by using a different request shape. [API parameter reference](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create)
 
-## Step 4: start the three containers
+## Step 3: start the three containers
 
 From the **host episode directory**, run:
 
