@@ -56,7 +56,7 @@ class OpenAIModelGateway:
         model: str,
         messages: list[dict[str, str]],
         temperature: float,
-        max_tokens: int,
+        max_completion_tokens: int,
     ) -> tuple[str, ModelCallTrace]:
         started = time.perf_counter()
         LOGGER.debug(
@@ -75,7 +75,7 @@ class OpenAIModelGateway:
                 "messages": messages,
                 "temperature": temperature,
                 "top_p": self.settings.llm_top_p,
-                "max_completion_tokens": max_tokens,
+                "max_completion_tokens": max_completion_tokens,
             },
         )
         try:
@@ -84,7 +84,7 @@ class OpenAIModelGateway:
                 messages=messages,
                 temperature=temperature,
                 top_p=self.settings.llm_top_p,
-                max_completion_tokens=max_tokens,
+                max_completion_tokens=max_completion_tokens,
             )
             content = response.choices[0].message.content
             if not content or not content.strip():
