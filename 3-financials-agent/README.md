@@ -54,7 +54,7 @@ Full expert requests send the question and selected evidence to the configured m
 Open three **host terminal windows**. In each, enter the existing development container:
 
 ```bash
-docker compose exec lab bash
+podman compose exec lab bash
 ```
 
 Run this from the host directory containing the Compose file. When the environment was started with Podman, use `podman compose exec lab bash` instead. Keep using the engine selected in Episode 1.
@@ -431,6 +431,8 @@ While we didn't cover the input / output governance with the News Expert, this a
 
 A domain prompt is not an input boundary. The application must decide what work is permitted before giving a model or tool the opportunity to perform it. For this expert, the relevant boundaries are **financial scope, issuer identity, permitted source categories, and permitted tool names**.
 
+![Financial Agent Input Governance](images/financial-agent-input.png)
+
 Inspect the deterministic plan locally, without contacting external services. **Terminal C:**
 
 ```bash
@@ -465,6 +467,8 @@ The advice example deliberately uses `ticker: AAPL`. In this source revision, an
 ### Inspect the output governance
 
 The generator is asked to use approved evidence, cite financial claims, disclose limits, and avoid unsupported forecasts or recommendations. Those instructions describe desired behavior. Deterministic checks define which parts the application actually enforces.
+
+![Financial Agent Input Governance](images/financial-agent-output.png)
 
 Keep all three check categories enabled:
 
@@ -556,7 +560,7 @@ The financial-specific lessons are:
 
 These are responsibilities of the application around the model, not features gained by assigning the model a financial persona.
 
-Return to the [workshop episode index](../README.md).
+Continue to [Episode 4: Orchestrator Expert](../4-orchestrator-agent/README.md), or return to the [workshop episode index](../README.md).
 
 ## Troubleshooting reference
 

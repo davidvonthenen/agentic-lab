@@ -434,7 +434,9 @@ Keep these lessons with the implementation:
 - **validation controls what the application actually checks**, and
 - **auditing records the decision path.**
 
-For additional retrieval experiments, continue with [Chunking Strategies for the News Expert](CHUNKING_STRATEGIES.md). Otherwise, return to the [workshop episode index](../README.md#episodes).
+For additional retrieval experiments, continue with [Chunking Strategies for the News Expert](CHUNKING_STRATEGIES.md).
+
+Continue to [Episode 3: Financials Expert](../3-financials-agent/README.md), or return to the [workshop episode index](../README.md#episodes).
 
 ## Troubleshooting reference
 
