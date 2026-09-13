@@ -339,13 +339,13 @@ You: Both.
 | `ORCH_API_KEY` | `not-needed` | Nemotron endpoint API key. |
 | `ORCH_MODEL` | `nvidia/Nemotron-Orchestrator-8B` | Orchestration model identifier. |
 | `ORCH_REQUEST_TIMEOUT` | `600` | Nemotron request timeout. |
-| `ORCH_MAX_TOKENS` | `131072` | Maximum Nemotron response tokens requested. |
+| `ORCH_MAX_TOKENS` | `127000` | Maximum Nemotron response tokens requested. |
 | `LLM_URL` | `http://127.0.0.1:8001/v1` | OpenAI-compatible synthesis endpoint. |
 | `LLM_API_KEY` | `not-needed` | Synthesis endpoint API key. |
 | `LLM_MODEL` | `Qwen/Qwen2.5-7B-Instruct` | Synthesis model identifier. |
 | `LLM_TEMPERATURE` | `0.2` | Synthesis temperature. |
 | `LLM_TOP_P` | `0.9` | Synthesis nucleus-sampling value. |
-| `LLM_MAX_TOKENS` | `131072` | Maximum synthesis response tokens requested. |
+| `LLM_MAX_TOKENS` | `127000` | Maximum synthesis response tokens requested. |
 | `LLM_REQUEST_TIMEOUT` | `600` | Synthesis request timeout. |
 | `NEWS_AGENT_URL` | `http://127.0.0.1:9001` | News Agent A2A base URL. |
 | `FINANCIAL_AGENT_URL` | `http://127.0.0.1:9002` | Financial Agent A2A base URL. |

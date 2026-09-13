@@ -162,15 +162,15 @@ export USE_EXTERNAL_OPENAI=false
 EXTERNAL_ORCH_URL=https://api.tokenfactory.nebius.com/v1/
 EXTERNAL_ORCH_API_KEY=<YOUR_NEBIUS_API_KEY>
 EXTERNAL_ORCH_MODEL=nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B
-EXTERNAL_ORCH_MAX_TOKENS=131072
+EXTERNAL_ORCH_MAX_TOKENS=127000
 
 EXTERNAL_LLM_URL=https://api.tokenfactory.nebius.com/v1/
 EXTERNAL_LLM_API_KEY=<YOUR_NEBIUS_API_KEY>
 EXTERNAL_LLM_MODEL=Qwen/Qwen3-30B-A3B-Instruct-2507
-EXTERNAL_LLM_MAX_TOKENS=131072
+EXTERNAL_LLM_MAX_TOKENS=127000
 ```
 
-The example preserves the requested Nebius model names and ceilings; confirm current account access and endpoint limits during validation. `131072` is not a promise that either endpoint accepts that output budget for every input.
+The example preserves the requested Nebius model names and ceilings; confirm current account access and endpoint limits during validation. `127000` is not a promise that either endpoint accepts that output budget for every input.
 
 The equivalent Bash/zsh configuration is:
 
@@ -181,11 +181,11 @@ export USE_EXTERNAL_OPENAI=false
 export EXTERNAL_ORCH_URL="https://api.tokenfactory.nebius.com/v1/"
 export EXTERNAL_ORCH_API_KEY="<YOUR NEBIUS API KEY>"
 export EXTERNAL_ORCH_MODEL="nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B"
-export EXTERNAL_ORCH_MAX_TOKENS="131072"
+export EXTERNAL_ORCH_MAX_TOKENS="127000"
 export EXTERNAL_LLM_URL="https://api.tokenfactory.nebius.com/v1/"
 export EXTERNAL_LLM_API_KEY="<YOUR NEBIUS API KEY>"
 export EXTERNAL_LLM_MODEL="Qwen/Qwen3-30B-A3B-Instruct-2507"
-export EXTERNAL_LLM_MAX_TOKENS="131072"
+export EXTERNAL_LLM_MAX_TOKENS="127000"
 
 export TAVILY_API_KEY=<YOUR_TAVILY_API_KEY>
 export FINNHUB_API_KEY=<YOUR_FUNNHUB_API_KEY>
