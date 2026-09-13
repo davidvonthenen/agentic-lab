@@ -1,0 +1,15 @@
+.PHONY: server agent test check audit
+
+server: agent
+agent:
+	python -m src.host_agent
+
+test:
+	pytest -q
+
+check:
+	python -m compileall -q client.py src tests
+	pytest -q
+
+audit:
+	python -m src.host_agent.audit
