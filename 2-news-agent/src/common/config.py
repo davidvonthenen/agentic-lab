@@ -39,7 +39,7 @@ class Settings:
     orch_model: str = "nvidia/Nemotron-Orchestrator-8B"
     orch_temperature: float = 0.0
     orch_top_p: float = 0.9
-    orch_max_tokens: int = 131072
+    orch_max_tokens: int = 127000
     orch_request_timeout: float = 600.0
 
     # OpenAI-compatible Qwen synthesis service
@@ -48,7 +48,7 @@ class Settings:
     llm_model: str = "Qwen/Qwen2.5-7B-Instruct"
     llm_temperature: float = 0.2
     llm_top_p: float = 0.9
-    llm_max_tokens: int = 131072
+    llm_max_tokens: int = 127000
     llm_request_timeout: float = 600.0
 
     # Bounded agent loop and verifier policy

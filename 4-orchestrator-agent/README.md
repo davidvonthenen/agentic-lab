@@ -5,7 +5,7 @@
 > not a production compliance, investment-advice, or trading system.
 
 This package implements the **Orchestrator Agent** for the API World session
-**“Vertical APIs for Agentic AI: Routing the Right Context to the Right Expert.”**
+**Vertical APIs for Agentic AI: Routing the Right Context to the Right Expert.**
 It exposes a narrow OpenAI-compatible API while preserving the existing
 `src/host_agent` layout so changes remain readable in a directory diff.
 

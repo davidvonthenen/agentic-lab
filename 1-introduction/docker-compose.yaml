@@ -1,6 +1,6 @@
 services:
   opensearch:
-    image: docker.io/opensearchproject/opensearch:3.5.0
+    image: docker.io/davidvonthenen/netapp-instaclustr-agentic-lab-os:0.0.13
     container_name: opensearch-single
     environment:
       discovery.type: single-node
