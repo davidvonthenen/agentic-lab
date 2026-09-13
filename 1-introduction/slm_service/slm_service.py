@@ -187,7 +187,8 @@ def _run_gguf_chat_completion(
         messages=messages,
         temperature=temperature,
         top_p=top_p,
-        max_completion_tokens=max_completion_tokens,
+        # llama-cpp-python uses max_tokens, not the HTTP API field name.
+        max_tokens=max_completion_tokens,
     )
 
     content = ""
@@ -220,7 +221,8 @@ def _run_mlx_chat_completion(
             model,
             tokenizer,
             prompt=prompt,
-            max_completion_tokens=max_completion_tokens,
+            # mlx-lm uses max_tokens, not the HTTP API field name.
+            max_tokens=max_completion_tokens,
             sampler=sampler,
             verbose=False,
         )
@@ -234,6 +236,23 @@ def _run_mlx_chat_completion(
         "total_tokens": prompt_tokens + completion_tokens,
     }
     return content, usage
+
+
+def _completion_token_limit(payload: Dict[str, Any]) -> int:
+    """Accept either HTTP field; prefer a non-null max_completion_tokens.
+
+    The local backend receives this value under its own max_tokens keyword.
+    A bounded positive integer prevents invalid requests from becoming
+    unbounded native generation calls.
+    """
+    value = payload.get("max_completion_tokens")
+    if value is None:
+        value = payload.get("max_tokens")
+    if value is None:
+        return 65536
+    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+        raise ValueError("The completion token limit must be a positive integer.")
+    return value
 
 
 def create_app() -> Flask:
@@ -284,12 +303,12 @@ def create_app() -> Flask:
 
         try:
             messages = _normalize_messages(payload)
+            max_completion_tokens = _completion_token_limit(payload)
         except ValueError as exc:
             return _error(400, str(exc))
 
         temperature = float(payload.get("temperature", 0.2))
         top_p = float(payload.get("top_p", 0.9))
-        max_completion_tokens = int(payload.get("max_completion_tokens", 65536))
         model = str(payload.get("model") or settings.llm_server_model)
 
         if settings.llm_runtime == "mlx":

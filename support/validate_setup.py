@@ -5,6 +5,8 @@ Default: check Python/packages, source configuration, all three containers,
 OpenSearch k-NN read/write, and small paid model completions. Capture the actual
 SDK parameters in isolated subprocesses before testing provider compatibility.
 Use --skip-models for an explicitly INCOMPLETE, infrastructure-only check.
+Use --inspect-model-requests to inspect loaded source paths and request fields
+without infrastructure checks or paid calls. Inspection also returns INCOMPLETE.
 """
 from __future__ import annotations
 
@@ -36,6 +38,7 @@ TRUE_VALUES = {"1", "true", "yes", "on"}
 # Separate interpreters prevent the three projects' `src` packages from colliding.
 CAPTURE_WORKER = r'''
 import asyncio, dataclasses, hashlib, importlib, json, logging, os, sys
+from pathlib import Path
 logging.disable(logging.CRITICAL)
 sys.path.insert(0, os.getcwd())
 component = sys.argv[1]
@@ -48,10 +51,17 @@ for name in list(config):
         config[name + '_sha256'] = hashlib.sha256(value.encode()).hexdigest()
 
 class Captured(BaseException):
-    def __init__(self, kwargs): self.kwargs = kwargs
+    def __init__(self, kwargs, source):
+        self.kwargs = kwargs
+        self.source = source
 class CaptureClient:
     def __init__(self, **kwargs): self.chat = self; self.completions = self
-    async def create(self, **kwargs): raise Captured(kwargs)
+    async def create(self, **kwargs):
+        caller = sys._getframe(1)
+        path = Path(caller.f_code.co_filename).resolve()
+        source = {'path': str(path), 'line': caller.f_lineno,
+                  'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
+        raise Captured(kwargs, source)
     async def close(self): pass
 import openai
 openai.AsyncOpenAI = CaptureClient
@@ -62,7 +72,7 @@ async def capture(label, role, coroutine):
     except Captured as result:
         params = dict(result.kwargs)
         params.pop('messages', None)
-        calls.append({'label': label, 'role': role, 'params': params})
+        calls.append({'label': label, 'role': role, 'params': params, 'source': result.source})
     else:
         raise RuntimeError('Expected an SDK call from ' + label)
 async def main():
@@ -257,8 +267,52 @@ def check_vector_roundtrip(base: str) -> str:
     return "Created, indexed, queried, and deleted a temporary Lucene HNSW cosine index."
 
 
+def resolve_repo_dir(explicit: Path | None) -> Path:
+    """Resolve the source tree after loading any requested environment file."""
+    if explicit is not None:
+        return explicit.expanduser().resolve()
+    configured = os.environ.get("LAB_REPO_DIR", "").strip()
+    if configured:
+        return Path(configured).expanduser().resolve()
+    adjacent = SCRIPT_DIR.parent
+    if all((adjacent / name / "Makefile").is_file() for name in COMPONENTS):
+        return adjacent.resolve()
+    return Path.cwd().resolve()
+
+
+def validate_model_params(base: str, params: dict[str, Any]) -> None:
+    """Check captured fields without disguising an application request bug."""
+    fields = [name for name in ("max_tokens", "max_completion_tokens") if name in params]
+    if len(fields) > 1:
+        raise CheckError("The application supplied both token-limit fields; send only one.")
+    for name in fields:
+        value = params[name]
+        if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+            raise CheckError(f"Configured {name} must be a positive integer.")
+    if urllib.parse.urlsplit(base).hostname == "api.openai.com" and "max_tokens" in params:
+        raise CheckError(
+            "Captured legacy max_tokens in an OpenAI request. This lab's migrated "
+            "clients must send max_completion_tokens. Update the source file printed "
+            "for this profile and verify --repo-dir/LAB_REPO_DIR. Container copies "
+            "are separate from host edits. The validator will not silently rename it."
+        )
+
+
+def request_profile_detail(call: dict[str, Any]) -> str:
+    """Show call-site provenance and allowlisted, non-credential parameters."""
+    source = call.get("source", {})
+    safe_names = ("model", "max_tokens", "max_completion_tokens", "temperature", "top_p", "reasoning_effort")
+    params = {name: call["params"][name] for name in safe_names if name in call["params"]}
+    return (
+        f"{source.get('path', '<unknown>')}:{source.get('line', '?')}; "
+        f"sha256={source.get('sha256', '<unknown>')}; "
+        f"params={json.dumps(params, sort_keys=True)}"
+    )
+
+
 def model_probe(base: str, key: str, params: dict[str, Any], *, tokens: int,
                 full_limits: bool, timeout: float) -> str:
+    validate_model_params(base, params)
     from openai import OpenAI
     body = dict(params)
     # The only default alterations are harmless probe messages and a smaller cap.
@@ -325,7 +379,8 @@ class Validator:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--repo-dir", type=Path, default=Path(os.environ.get("LAB_REPO_DIR", Path.cwd())))
+    parser.add_argument("--repo-dir", type=Path, help="Source tree to validate. Defaults to LAB_REPO_DIR, then the tree beside this script, then the current directory.")
+    parser.add_argument("--inspect-model-requests", action="store_true", help="Only inspect source paths and request fields; no infrastructure checks or paid calls. Returns 2 when inspection succeeds (readiness remains incomplete).")
     parser.add_argument("--env-file", type=Path, help="Native mode: load provider variables without overriding shell exports.")
     parser.add_argument("--native", action="store_true", help="Run in a host Python environment; no lab container expected.")
     parser.add_argument("--skip-models", action="store_true", help="No billable API calls. Returns 2 when otherwise healthy (incomplete).")
@@ -342,6 +397,29 @@ def parse_args() -> argparse.Namespace:
     return args
 
 
+def finish_validation(validator: Validator, json_report: Path | None,
+                      summary: str, *, scope: str = "episode-1") -> int:
+    """Print a summary and optionally write the same redacted report contract."""
+    code = validator.exit_code()
+    print("\n" + summary)
+    if json_report:
+        report = {"scope": scope, "exit_code": code, "summary": summary,
+                  "results": [asdict(result) for result in validator.results]}
+        try:
+            fd = os.open(json_report, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+            try:
+                os.fchmod(fd, 0o600)
+            except (AttributeError, OSError):
+                pass
+            with os.fdopen(fd, "w", encoding="utf-8") as stream:
+                json.dump(report, stream, indent=2)
+                stream.write("\n")
+        except OSError as exc:
+            print("[FAIL] Could not write report: " + redact(exc), file=sys.stderr)
+            return 1
+    return code
+
+
 def main() -> int:
     args = parse_args()
     if args.env_file:
@@ -350,8 +428,31 @@ def main() -> int:
             print("[FAIL] Environment file not found.", file=sys.stderr)
             return 1
         load_dotenv(args.env_file, override=False)
-    repo = args.repo_dir.resolve()
+    repo = resolve_repo_dir(args.repo_dir)
     validator = Validator()
+    validator.record("Validator source", "INFO", str(Path(__file__).resolve()))
+    validator.record("Repository source", "INFO", str(repo))
+    if args.inspect_model_requests:
+        validator.incomplete = True
+        for component in COMPONENTS:
+            try:
+                snap = capture_component(repo, component)
+                for call in snap["calls"]:
+                    name = component + "/" + call["label"]
+                    validator.record(name + " request", "INFO", request_profile_detail(call))
+                    base = snap["config"][call["role"] + "_url"]
+                    try:
+                        validate_model_params(base, call["params"])
+                        validator.record(name + " inspection", "PASS", "Request captured; no inference call was made.")
+                    except CheckError as exc:
+                        validator.record(name + " inspection", "FAIL", exc)
+            except Exception as exc:
+                validator.record(component + " source inspection", "FAIL", exc)
+        summary = (
+            "INCOMPLETE — source inspection passed; infrastructure and inference were not tested"
+            if validator.exit_code() == 2 else "NOT READY — resolve source inspection failures"
+        )
+        return finish_validation(validator, args.json_report, summary, scope="model-request-inspection")
     validator.record("Scope", "INFO", "Episode 1 readiness only; no specialist, MCP, or Orchestrator service is expected yet.")
     if sys.version_info[:2] == (3, 12):
         validator.record("Python", "PASS", f"{platform.python_version()} on {platform.system()}/{platform.machine()}")
@@ -373,6 +474,8 @@ def main() -> int:
             try:
                 snap = capture_component(repo, component)
                 cfg = snap["config"]
+                for call in snap["calls"]:
+                    validator.record(component + "/" + call["label"] + " request", "INFO", request_profile_detail(call))
                 if not all(cfg.get(name) is True for name in ("policy_checks_enabled", "evidence_checks_enabled", "release_checks_enabled")):
                     raise CheckError("Policy, evidence, and release checks must all remain enabled.")
                 for role in ("orch", "llm"):
@@ -442,12 +545,7 @@ def main() -> int:
                 try:
                     key = provider_key(role)
                     url = validate_base_url(cfg[role + "_url"])
-                    if any(int(params.get(field, 1)) <= 0 for field in ("max_tokens", "max_completion_tokens")):
-                        raise CheckError("Configured output token ceilings must be positive.")
-                    # if urllib.parse.urlsplit(url).hostname == "api.openai.com" and (params.get("model") == "gpt-5.4" or str(params.get("model", "")).startswith("gpt-5.4-2026-")):
-                    #     ceiling = max(int(params.get(field, 0)) for field in ("max_tokens", "max_completion_tokens"))
-                    #     if ceiling > 128000:
-                    #         raise CheckError("The configured output ceiling exceeds GPT-5.4's documented 128000 tokens. Set EXTERNAL_ORCH_MAX_TOKENS and EXTERNAL_LLM_MAX_TOKENS to 128000 for this lab.")
+                    validate_model_params(url, params)
                     identity = json.dumps([url, hashlib.sha256(key.encode()).hexdigest(), params], sort_keys=True)
                     item = profiles.setdefault(identity, {"url": url, "key": key, "params": params, "labels": []})
                     item["labels"].append(component + "/" + call["label"])
@@ -468,23 +566,7 @@ def main() -> int:
     validator.record("Later-episode services", "SKIP", "News, Financials, Orchestrator, Tavily MCP, Finnhub MCP, and real corpus ingestion are deliberately not tested in Episode 1.")
     code = validator.exit_code()
     summary = "READY FOR EPISODE 2" if code == 0 else "INCOMPLETE — run the model checks before continuing" if code == 2 else "NOT READY — resolve failed checks and rerun"
-    print("\n" + summary)
-    if args.json_report:
-        report = {"scope": "episode-1", "exit_code": code, "summary": summary,
-                  "results": [asdict(result) for result in validator.results]}
-        try:
-            fd = os.open(args.json_report, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-            try:
-                os.fchmod(fd, 0o600)
-            except (AttributeError, OSError):
-                pass
-            with os.fdopen(fd, "w", encoding="utf-8") as stream:
-                json.dump(report, stream, indent=2)
-                stream.write("\n")
-        except OSError as exc:
-            print("[FAIL] Could not write report: " + redact(exc), file=sys.stderr)
-            return 1
-    return code
+    return finish_validation(validator, args.json_report, summary)
 
 
 if __name__ == "__main__":
