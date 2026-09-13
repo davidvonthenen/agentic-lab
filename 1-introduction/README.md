@@ -157,6 +157,7 @@ Copy `.env.nebius.example` to `.env` instead and replace **both** key placeholde
 
 ```dotenv
 USE_EXTERNAL_AI=true
+export USE_EXTERNAL_OPENAI=false
 
 EXTERNAL_ORCH_URL=https://api.tokenfactory.nebius.com/v1/
 EXTERNAL_ORCH_API_KEY=<YOUR_NEBIUS_API_KEY>
@@ -175,6 +176,8 @@ The equivalent Bash/zsh configuration is:
 
 ```bash
 export USE_EXTERNAL_AI=true
+export USE_EXTERNAL_OPENAI=false
+
 export EXTERNAL_ORCH_URL="https://api.tokenfactory.nebius.com/v1/"
 export EXTERNAL_ORCH_API_KEY="<YOUR NEBIUS API KEY>"
 export EXTERNAL_ORCH_MODEL="nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B"
