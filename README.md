@@ -1,1 +1,50 @@
-# agentic-lab
+# Vertical APIs for Agentic AI
+
+This hands-on lab demonstrates an Agentic AI solution built with an application-level **Mixture of Experts (MoE) architecture**. A central Orchestrator routes each request to the appropriate domain expert, evaluates whether the returned information is sufficient, and uses a bounded reinforcement loop to continue, correct, synthesize, release, or withhold the response.
+
+The lab's example is a technology-company research agent with a focus on financials. It brings together historical and current technology news, SEC filing evidence, and current market data so participants can examine how company announcements and strategy relate to financial outcomes. The architecture separates deterministic policy, specialist authority, evidence retrieval, natural-language generation, and release governance instead of assigning every responsibility to one model.
+
+The Orchestrator communicates with the News and Financials Experts through Agent2Agent (A2A). Each expert uses retrieval-augmented generation (RAG) using [OpenSearch](https://opensearch.org) for governed historical data and [Model Context Protocol (MCP)](https://github.com/github/github-mcp-server) for current external data. Citations and audit records preserve evidence provenance across these boundaries.
+
+![Architecture of the Orchestrator, News Agent, Financials Agent, OpenSearch, and MCP data services](images/demo-architecture-simplistic-final.png)
+
+## Ways to Experience This Lab
+
+| This Lab | Local Laptop | CLI | Notebook | Videos |
+|---|---|---|---|---|
+| **Agentic AI** | [Getting Started](#getting-started) | _Coming soon:_<br>Codex<br>Claude<br>Cursor | _Coming soon_ | [Videos](#videos) |
+
+## Episodes
+
+These episodes are cumulative and build on top of one another leading up to the final episode of the client exercising our Agentic research agent.
+
+| Episode | Description | Hands-on Lab |
+| --- | --- | --- |
+| **1. Introduction to our Agentic Researcher** | Review the architecture, prepare the Python environment, start OpenSearch, and validate the shared services required by the lab. | [Start](1-introduction/README.md) |
+| **2. News Expert** | Build a governed specialist that combines historical OpenSearch RAG with current technology news retrieved through Tavily MCP. | [Start](2-news-agent/README.md) |
+| **3. Financial Expert** | Build a governed specialist that combines exact-ticker SEC filing RAG with structured market data retrieved through Finnhub MCP. | [Start](3-financials-agent/README.md) |
+| **4. Orchestrator Expert** | Route one-company requests to the specialists over A2A, evaluate completion, and synthesize evidence without crossing authority boundaries. | [Start](4-orchestration-agent/README.md) |
+| **5. Ask with our Client** | Use the OpenAI-compatible client to exercise news, financial, combined, clarification, and conversational follow-up flows. | [Start](5-client/README.md) |
+
+## Getting Started
+
+The lab assembles the solution one boundary at a time. You will first prepare the development environment and OpenSearch, then run each specialist independently before connecting them to the Orchestrator. Every episode will explain what is being started, why it exists, what data crosses its interfaces, what output to expect, and how to diagnose failures before proceeding.
+
+Plan to keep several terminal sessions open as the architecture grows. The complete experience requires a compatible Python environment, OpenSearch, a small historical-news dataset, converted SEC filing samples, Tavily and Finnhub credentials, and either local model weights or compatible OpenAI-style model endpoints. Beginning with the foundation episode keeps those dependencies visible and verifiable before the agent workflows are introduced.
+
+[Start Episode 1: Introduction to our Agentic Technology-company Researcher](1-introduction/README.md)
+
+## Learn with Codex, Claude Code, or Cursor
+
+Coming Soon
+
+## Jupyter Notebook
+
+Coming Soon
+
+## Videos
+
+This session was presented at [API World / AI TechWorld 2026 (Sept 2026)](https://apiworld.co/) in a session titled: [Vertical APIs for Agentic AI: Routing the Right Context to the Right Expert](https://bit.ly/4vTjFUi). You can watch the post conference recording by clicking the image below.
+
+[![Vertical APIs for Agentic AI: Routing the Right Context to the Right Expert](images/youtube-thumbnail-click-here.jpeg)](https://bit.ly/4iqaYhh)
+*[Click the image to watch this session](https://bit.ly/4iqaYhh)*

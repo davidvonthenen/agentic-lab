@@ -3,7 +3,7 @@
 FROM docker.io/library/python:3.12-slim-bookworm
 
 # The publisher sets these constants in docker-compose.yml, not in a secret file.
-ARG LAB_REPO_URL=github.com/davidvonthenen/agentic-lab
+ARG LAB_REPO_URL=https://github.com/davidvonthenen/agentic-lab
 ARG LAB_REPO_REF=main
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
