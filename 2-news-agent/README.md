@@ -6,9 +6,6 @@ In this episode, you run the **News Expert**, an independently governed technolo
 
 This is one expert in the labs's **application-level Mixture of Experts (MoE)** architecture. Here, an expert is an application with a defined responsibility, bounded tools, evidence requirements, and its own validation workflow. This episode runs the News Expert independently.
 
-TODO: MOVE
-> **Use the preloaded data.** The supplied OpenSearch image already contains the workshop's news vectors. Do **not** run `make ingest`, delete the index, or recreate it during this walkthrough. We will explain ingestion without repeating it. You also do not need to run `make install` or create another Python environment inside the development container.
-
 ## What you will learn
 
 By the end, you should be able to explain why historical retrieval and current search serve different purposes, why planning and answer generation are separate model roles, and how application code controls evidence ownership, correction, and release. You will also be able to distinguish a successful network request from an answer that actually passed the application's checks.
@@ -23,8 +20,6 @@ The practical sequence is:
 | 4 | Start and test Tavily through MCP. | The bounded news tool returns source records or a diagnosable error. |
 | 5 | Start the News Expert. | Its health endpoint and Agent Card respond. |
 | 6 | Ask historical, current, and combined news questions. | Source choices and citations match the available evidence. |
-| 7 | Inspect the audit record. | A response can be traced to routing, retrieval, verification, and outcome. |
-| 8 | Exercise governance behavior. | A domain boundary and citation checks are observable. |
 
 ## Understand the News Expert before starting it
 
@@ -55,8 +50,6 @@ The News Expert contains two model roles. The `ORCH` configuration names refer t
 In the [conference recording demonstration](https://bit.ly/4iqaYhh), we used Nemotron for the first model role and Qwen for generation. Separating those jobs lets you change or evaluate a planner without changing the generator, and change writing behavior without changing the application's authority rules.
 
 In this lab, we default to OpenAI and configure both roles with `gpt-5.4`. Its optional external-provider profile assigns different models. This episode uses the configuration you already validated. It does not start local text-generation servers. Distinct models can also share failure modes; adding a second model is not, by itself, a correctness guarantee, but it can help based on the model.
-
-> **Important release behavior:** In the supplied source, the model verifier is advisory. Its concerns are recorded, but its rejection or unavailability does not independently block an answer that passed deterministic checks. The hard checks and audit-persistence requirement are described in Steps 8 and 9. Do not interpret "model review ran" as "every claim was proved."
 
 [Implementation: model configuration](src/common/config.py)
 [Model calls](src/news_agent/llm.py)
@@ -142,6 +135,8 @@ This command prints selected settings, not credentials. Avoid publishing a full 
 **Do not change the embedding model to obtain a faster first run.** Query vectors must use the same embedding space as the preloaded document vectors. A matching dimension is necessary but does not establish that two different models are compatible. The source defines the default; the live index inspection in Step 3 checks the actual mapping. The provided files do not contain an image-build manifest that independently certifies its embedding model and corpus cutoff.
 
 ## Step 2: inspect the preloaded historical corpus
+
+> **Use the preloaded data.** The supplied OpenSearch image already contains the workshop's news vectors. Do **not** run `make ingest`, delete the index, or recreate it during this walkthrough. We will explain ingestion without repeating it. You also do not need to run `make install` or create another Python environment inside the development container.
 
 Historical RAG means retrieving from the corpus available to this application, not asking the generation model to remember an article. Inspect that corpus before asking it questions.
 
@@ -296,7 +291,7 @@ The two sources are complementary: historical articles provide earlier context, 
 
 ### Start the MCP server
 
-**Terminal A**, with the Tavily key available in that shell or inherited from Compose:
+**Terminal A**, with the Tavily API key available in that shell or inherited from Compose:
 
 ```bash
 make mcp
@@ -428,57 +423,15 @@ Audit ID: <request-specific identifier>
 
 The application assigns `H1`, `H2`, and so on to historical items and `W1`, `W2`, and so on to current-search items. These IDs belong to **one request**; `H1` in a later answer may identify a different chunk. The application constructs the final Sources section from registered items actually cited in the answer. The generator does not own their URLs or record metadata.
 
-## Step 7: follow the chain of custody in the audit
-
-A citation connects a statement to a registered source. The audit connects the request to its route, evidence set, generation attempts, checks, and final result. Together, they make the workflow inspectable instead of leaving only a fluent paragraph.
-
-**Terminal C**, after a request completes:
-
-```bash
-python - <<'PY'
-import json
-from pathlib import Path
-from src.common.config import load_settings
-
-path = Path(load_settings().audit_log_path).expanduser()
-if not path.is_file():
-    raise SystemExit(f"No audit file at {path}. Complete an expert request first.")
-last = None
-with path.open(encoding="utf-8") as handle:
-    for line in handle:
-        if line.strip():
-            last = json.loads(line)
-if last is None:
-    raise SystemExit("The audit file is empty.")
-print(json.dumps(last, indent=2, ensure_ascii=False))
-PY
-```
-
-**Expected:** the last record's `audit_id` matches the last completed answer when you are issuing requests sequentially. With concurrent users, match by Audit ID instead of assuming the last record is yours.
-
-| Audit field | What to inspect |
-|---|---|
-| `request` | Query hash and length, session/task identifiers, and permitted request metadata. |
-| `authority.checks` | Which policy, evidence, and release categories were enabled. |
-| `models` | Actual model identifiers for router/verifier, generator, and embeddings. |
-| `route` | `need_historical`, `need_realtime`, decision source, and any planner error. |
-| `retrieval` | Selected sources, counts, failures, missing sources, and evidence provenance. |
-| `retrieval.evidence` | Citation IDs, chunk/source identifiers, URLs, dates, scores, and evidence-text hashes. |
-| `generation` | Attempt count, draft hashes, and per-attempt verification details. |
-| `verification` | Deterministic or advisory review result and recorded issues. |
-| `outcome` | Final application status, release decision, and answer hash when available. |
-
-Some fields are absent on early exits, such as input rejection or a domain redirect. That is meaningful: those requests did not proceed through generation.
-
 ## Completion checkpoint
 
-You have completed this episode! Leave the shared services running in Terminals B and A when continuing the workshop.
+You have completed this episode! Leave the shared services running in Terminals A (Tavily MCP) and B (News Expert) when continuing the workshop.
 
 Keep these lessons with the implementation:
 
 - **authority limits what the expert may do**
 - **provenance explains where its evidence came from**
-- **validation controls what the application actually checks, and**
+- **validation controls what the application actually checks**, and
 - **auditing records the decision path.**
 
 For additional retrieval experiments, continue with [Chunking Strategies for the News Expert](CHUNKING_STRATEGIES.md). Otherwise, return to the [workshop episode index](../README.md#episodes).
