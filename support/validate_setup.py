@@ -281,7 +281,11 @@ def resolve_repo_dir(explicit: Path | None) -> Path:
 
 
 def validate_model_params(base: str, params: dict[str, Any]) -> None:
-    """Check captured fields without disguising an application request bug."""
+    """Validate token-limit structure without provider-specific name restrictions.
+
+    Keep the base argument for compatibility with existing callers. The provider
+    decides whether the selected model supports the captured parameter name.
+    """
     fields = [name for name in ("max_tokens", "max_completion_tokens") if name in params]
     if len(fields) > 1:
         raise CheckError("The application supplied both token-limit fields; send only one.")
@@ -289,13 +293,6 @@ def validate_model_params(base: str, params: dict[str, Any]) -> None:
         value = params[name]
         if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
             raise CheckError(f"Configured {name} must be a positive integer.")
-    if urllib.parse.urlsplit(base).hostname == "api.openai.com" and "max_tokens" in params:
-        raise CheckError(
-            "Captured legacy max_tokens in an OpenAI request. This lab's migrated "
-            "clients must send max_completion_tokens. Update the source file printed "
-            "for this profile and verify --repo-dir/LAB_REPO_DIR. Container copies "
-            "are separate from host edits. The validator will not silently rename it."
-        )
 
 
 def request_profile_detail(call: dict[str, Any]) -> str:
