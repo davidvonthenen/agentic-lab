@@ -53,7 +53,8 @@ RUN python -m pip install --no-cache-dir --upgrade pip \
 COPY validate_setup.py runtime_health.py container-entrypoint.sh /opt/lab/
 # Normalize the entrypoint even when checked out by a Windows Git client.
 RUN sed -i 's/\r$//' /opt/lab/container-entrypoint.sh \
-    && chmod 755 /opt/lab/container-entrypoint.sh
+    && chmod 755 /opt/lab/container-entrypoint.sh \
+    && chown -R lab:lab /opt/lab
 
 USER lab
 WORKDIR /workspace/agentic-rag

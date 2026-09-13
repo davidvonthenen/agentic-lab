@@ -20,11 +20,11 @@ These episodes are cumulative and build on top of one another leading up to the 
 
 | Episode | Description | Hands-on Lab |
 | --- | --- | --- |
-| **1. Introduction to our Agentic Researcher** | Review the architecture, prepare the Python environment, start OpenSearch, and validate the shared services required by the lab. | [Start](1-introduction/README.md) |
-| **2. News Expert** | Build a governed specialist that combines historical OpenSearch RAG with current technology news retrieved through Tavily MCP. | [Start](2-news-agent/README.md) |
-| **3. Financial Expert** | Build a governed specialist that combines exact-ticker SEC filing RAG with structured market data retrieved through Finnhub MCP. | [Start](3-financials-agent/README.md) |
-| **4. Orchestrator Expert** | Route one-company requests to the specialists over A2A, evaluate completion, and synthesize evidence without crossing authority boundaries. | [Start](4-orchestration-agent/README.md) |
-| **5. Ask with our Client** | Use the OpenAI-compatible client to exercise news, financial, combined, clarification, and conversational follow-up flows. | [Start](5-client/README.md) |
+| **1. Introduction to our Agentic Researcher** | Review the architecture, prepare the Python environment, start OpenSearch, and validate the shared services required by the lab. | [Start](1-introduction) |
+| **2. News Expert** | Build a governed specialist that combines historical OpenSearch RAG with current technology news retrieved through Tavily MCP. | [Start](2-news-agent) |
+| **3. Financial Expert** | Build a governed specialist that combines exact-ticker SEC filing RAG with structured market data retrieved through Finnhub MCP. | [Start](3-financials-agent) |
+| **4. Orchestrator Expert** | Route one-company requests to the specialists over A2A, evaluate completion, and synthesize evidence without crossing authority boundaries. | [Start](4-orchestration-agent) |
+| **5. Ask with our Client** | Use the OpenAI-compatible client to exercise news, financial, combined, clarification, and conversational follow-up flows. | [Start](5-client) |
 
 ## Getting Started
 
@@ -32,7 +32,7 @@ The lab assembles the solution one boundary at a time. You will first prepare th
 
 Plan to keep several terminal sessions open as the architecture grows. The complete experience requires a compatible Python environment, OpenSearch, a small historical-news dataset, converted SEC filing samples, Tavily and Finnhub credentials, and either local model weights or compatible OpenAI-style model endpoints. Beginning with the foundation episode keeps those dependencies visible and verifiable before the agent workflows are introduced.
 
-[Start Episode 1: Introduction to our Agentic Technology-company Researcher](1-introduction/README.md)
+[Start Episode 1: Introduction to our Agentic Technology-company Researcher](1-introduction)
 
 ## Learn with Codex, Claude Code, or Cursor
 
