@@ -18,12 +18,22 @@ class Settings:
     api_port: int = 10000
     public_model_name: str = "vertical-api-orchestrator"
 
+    # which setting
+    external_ai: bool = False
+    external_orch_ai: bool = False
+    external_llm_ai: bool = False
+    use_openai: bool = False
+
+    # OpenAI-compatible Nemotron routing/verifier service
     orch_url: str = "http://127.0.0.1:8002/v1"
     orch_api_key: str = "not-needed"
     orch_model: str = "nvidia/Nemotron-Orchestrator-8B"
+    orch_temperature: float = 0.0
+    orch_top_p: float = 0.9
     orch_max_tokens: int = 131072
     orch_request_timeout: float = 600.0
 
+    # OpenAI-compatible Qwen synthesis service
     llm_url: str = "http://127.0.0.1:8001/v1"
     llm_api_key: str = "not-needed"
     llm_model: str = "Qwen/Qwen2.5-7B-Instruct"
@@ -121,8 +131,9 @@ def load_settings(env_file: str | None = None) -> Settings:
         external_orch_ai = True
         external_llm_ai = True
 
+    # ORCH
     _orch_url = os.getenv("ORCH_URL", Settings.orch_url)
-    if external_ai or external_orch_ai:
+    if external_orch_ai:
         if use_openai:
             _orch_url = "https://api.openai.com/v1"
         else:
@@ -131,13 +142,13 @@ def load_settings(env_file: str | None = None) -> Settings:
     _orch_api_key = os.getenv("ORCH_API_KEY", Settings.orch_api_key)
     if use_openai:
         _orch_api_key = _get_str("OPENAI_API_KEY", "")
-    elif external_ai or external_orch_ai:
+    elif external_orch_ai:
         _orch_api_key = _get_str("EXTERNAL_ORCH_API_KEY", Settings.orch_api_key)
 
     _orch_model = os.getenv("ORCH_MODEL", Settings.orch_model)
     if use_openai:
         _orch_model = os.getenv("OPENAI_MODEL", "gpt-5.4")
-    elif external_ai or external_orch_ai:
+    elif external_orch_ai:
         _orch_model = os.getenv("EXTERNAL_ORCH_MODEL", "")
 
     _orch_max_tokens = _get_int("ORCH_MAX_TOKENS", Settings.orch_max_tokens)

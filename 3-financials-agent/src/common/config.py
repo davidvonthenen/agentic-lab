@@ -25,6 +25,12 @@ class Settings:
     rag_top_k: int = 3
     rag_num_candidates: int = 3
 
+    # which setting
+    external_ai: bool = False
+    external_orch_ai: bool = False
+    external_llm_ai: bool = False
+    use_openai: bool = False
+
     # OpenAI-compatible Nemotron routing/verifier service
     orch_url: str = "http://127.0.0.1:8002/v1"
     orch_api_key: str = "not-needed"
@@ -173,7 +179,7 @@ def load_settings(env_file: str | None = None) -> Settings:
             _llm_url = _get_str("EXTERNAL_LLM_URL", "https://api.openai.com/v1")
 
     _llm_api_key = os.getenv("LLM_API_KEY", Settings.llm_api_key)
-    if  use_openai:
+    if use_openai:
         _llm_api_key = _get_str("OPENAI_API_KEY", "")
     elif external_llm_ai:
         _llm_api_key = _get_str("EXTERNAL_LLM_API_KEY", Settings.llm_api_key)

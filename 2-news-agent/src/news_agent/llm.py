@@ -47,25 +47,40 @@ class LocalModelGateway:
         return content.strip()
 
     async def orchestrator_completion(self, messages: list[dict[str, str]]) -> str:
-        LOGGER.debug("Calling Nemotron orchestrator at %s", self.settings.orch_url)
-        response = await self._orchestrator.chat.completions.create(
-            model=self.settings.orch_model,
-            messages=messages,
-            temperature=self.settings.orch_temperature,
-            top_p=self.settings.orch_top_p,
-            max_completion_tokens=self.settings.orch_max_tokens,
-        )
+        if self.settings.use_openai:
+            LOGGER.debug("Calling Nemotron orchestrator at %s", self.settings.orch_url)
+            response = await self._orchestrator.chat.completions.create(
+                model=self.settings.orch_model,
+                messages=messages,
+                max_completion_tokens=self.settings.orch_max_tokens,
+            )
+        else:
+            LOGGER.debug("Calling Nemotron orchestrator at %s", self.settings.orch_url)
+            response = await self._orchestrator.chat.completions.create(
+                model=self.settings.orch_model,
+                messages=messages,
+                temperature=self.settings.orch_temperature,
+                top_p=self.settings.orch_top_p,
+                max_completion_tokens=self.settings.orch_max_tokens,
+            )
         return self._content(response)
 
     async def generator_completion(self, messages: list[dict[str, str]]) -> str:
         LOGGER.debug("Calling Qwen generator at %s", self.settings.llm_url)
-        response = await self._generator.chat.completions.create(
-            model=self.settings.llm_model,
-            messages=messages,
-            temperature=self.settings.llm_temperature,
-            top_p=self.settings.llm_top_p,
-            max_completion_tokens=self.settings.llm_max_tokens,
-        )
+        if self.settings.use_openai:
+            response = await self._generator.chat.completions.create(
+                model=self.settings.llm_model,
+                messages=messages,
+                max_completion_tokens=self.settings.llm_max_tokens,
+            )
+        else:
+            response = await self._generator.chat.completions.create(
+                model=self.settings.llm_model,
+                messages=messages,
+                temperature=self.settings.llm_temperature,
+                top_p=self.settings.llm_top_p,
+                max_completion_tokens=self.settings.llm_max_tokens,
+            )
         return self._content(response)
 
 

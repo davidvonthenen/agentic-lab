@@ -27,6 +27,12 @@ class Settings:
     rag_max_chunks_per_source: int = 2
     evidence_snippet_max_chars: int = 1200
 
+    # which setting
+    external_ai: bool = False
+    external_orch_ai: bool = False
+    external_llm_ai: bool = False
+    use_openai: bool = False
+
     # OpenAI-compatible Nemotron routing/verifier service
     orch_url: str = "http://127.0.0.1:8002/v1"
     orch_api_key: str = "not-needed"
@@ -142,6 +148,8 @@ def load_settings(env_file: str | None = None) -> Settings:
     use_openai = os.getenv("USE_EXTERNAL_OPENAI", "false").lower() in ("1", "true", "yes", "on")
     if use_openai:
         external_ai = True
+        external_orch_ai = True
+        external_llm_ai = True
 
     # ORCH
     _orch_url = os.getenv("ORCH_URL", Settings.orch_url)

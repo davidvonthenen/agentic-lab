@@ -65,27 +65,47 @@ class OpenAIModelGateway:
             model,
             endpoint,
         )
-        log_payload(
-            LOGGER,
-            f"Model request payload role={role}",
-            {
-                "role": role,
-                "endpoint": endpoint,
-                "model": model,
-                "messages": messages,
-                "temperature": temperature,
-                "top_p": self.settings.llm_top_p,
-                "max_completion_tokens": max_completion_tokens,
-            },
-        )
-        try:
-            response = await client.chat.completions.create(
-                model=model,
-                messages=messages,
-                temperature=temperature,
-                top_p=self.settings.llm_top_p,
-                max_completion_tokens=max_completion_tokens,
+        if self.settings.use_openai:
+            log_payload(
+                LOGGER,
+                f"Model request payload role={role}",
+                {
+                    "role": role,
+                    "endpoint": endpoint,
+                    "model": model,
+                    "messages": messages,
+                    "max_completion_tokens": max_completion_tokens,
+                },
             )
+        else:
+            log_payload(
+                LOGGER,
+                f"Model request payload role={role}",
+                {
+                    "role": role,
+                    "endpoint": endpoint,
+                    "model": model,
+                    "messages": messages,
+                    "temperature": temperature,
+                    "top_p": self.settings.llm_top_p,
+                    "max_completion_tokens": max_completion_tokens,
+                },
+            )
+        try:
+            if self.settings.use_openai:
+                response = await client.chat.completions.create(
+                    model=model,
+                    messages=messages,
+                    max_completion_tokens=max_completion_tokens,
+                )
+            else:
+                response = await client.chat.completions.create(
+                    model=model,
+                    messages=messages,
+                    temperature=temperature,
+                    top_p=self.settings.llm_top_p,
+                    max_completion_tokens=max_completion_tokens,
+                )
             content = response.choices[0].message.content
             if not content or not content.strip():
                 raise ValueError("Model returned an empty response")
