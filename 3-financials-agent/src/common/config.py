@@ -168,7 +168,7 @@ def load_settings(env_file: str | None = None) -> Settings:
 
     _orch_max_tokens = _get_int("ORCH_MAX_TOKENS", Settings.orch_max_tokens)
     if external_orch_ai or use_openai:
-        _orch_max_tokens = _get_int("EXTERNAL_ORCH_MAX_TOKENS", 131072)
+        _orch_max_tokens = _get_int("EXTERNAL_ORCH_MAX_TOKENS", 127000)
 
     # LLM
     _llm_url = os.getenv("LLM_URL", Settings.llm_url)
@@ -192,7 +192,7 @@ def load_settings(env_file: str | None = None) -> Settings:
 
     _llm_max_tokens = _get_int("LLM_MAX_TOKENS", Settings.llm_max_tokens)
     if external_llm_ai or use_openai:
-        _llm_max_tokens = _get_int("EXTERNAL_LLM_MAX_TOKENS", 131072)
+        _llm_max_tokens = _get_int("EXTERNAL_LLM_MAX_TOKENS", 127000)
 
     return Settings(
         opensearch_host=_get_str("OPENSEARCH_HOST", Settings.opensearch_host),
