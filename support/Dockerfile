@@ -35,9 +35,10 @@ RUN LAB_REPO_URL="${LAB_REPO_URL}" python -c \
 RUN git clone --filter=blob:none "${LAB_REPO_URL}" /opt/lab/repository \
     && git -C /opt/lab/repository checkout --detach "${LAB_REPO_REF}" \
     && git -C /opt/lab/repository rev-parse HEAD > /opt/lab/repository-revision.txt \
-    && test -f /opt/lab/repository/news_agent/Makefile \
-    && test -f /opt/lab/repository/financials_agent/Makefile \
-    && test -f /opt/lab/repository/orchestrator_agent/Makefile
+    && test -f /opt/lab/repository/2-news-agent/Makefile \
+    && test -f /opt/lab/repository/3-financials-agent/Makefile \
+    && test -f /opt/lab/repository/4-orchestrator-agent/Makefile \
+    && test -f /opt/lab/repository/5-client/Makefile
 
 COPY requirements.txt /opt/lab/requirements.txt
 # Install CPU Torch first to avoid downloading an unused CUDA runtime on AMD64.
