@@ -16,7 +16,7 @@ class Handler(BaseHTTPRequestHandler):
             return
         repo = Path(os.environ.get("LAB_REPO_DIR", "/workspace/agentic-rag"))
         ready = all((repo / part / "Makefile").is_file() for part in
-                    ("news_agent", "financials_agent", "orchestrator_agent"))
+                    ("2-news-agent", "3-financials-agent", "4-orchestrator-agent"))
         body = json.dumps({"service": "agentic-lab", "status": "ok" if ready else "not_ready",
                            "python": platform.python_version(), "repository_ready": ready}).encode()
         self.send_response(200 if ready else 503)

@@ -270,7 +270,7 @@ class NemotronOrchestrator:
                             },
                         ],
                         temperature=0.0,
-                        max_tokens=self.settings.orch_max_tokens,
+                        max_completion_tokens=self.settings.orch_max_tokens,
                     )
                     content = self._response_content(response)
                     parsed = schema.model_validate(_json_object(content))
@@ -477,7 +477,7 @@ class NemotronOrchestrator:
                         ],
                         temperature=self.settings.llm_temperature,
                         top_p=self.settings.llm_top_p,
-                        max_tokens=self.settings.llm_max_tokens,
+                        max_completion_tokens=self.settings.llm_max_tokens,
                     )
                     content = self._response_content(response)
                     validator(content)

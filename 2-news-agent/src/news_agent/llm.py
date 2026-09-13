@@ -53,7 +53,7 @@ class LocalModelGateway:
             messages=messages,
             temperature=self.settings.orch_temperature,
             top_p=self.settings.orch_top_p,
-            max_tokens=self.settings.orch_max_tokens,
+            max_completion_tokens=self.settings.orch_max_tokens,
         )
         return self._content(response)
 
@@ -64,7 +64,7 @@ class LocalModelGateway:
             messages=messages,
             temperature=self.settings.llm_temperature,
             top_p=self.settings.llm_top_p,
-            max_tokens=self.settings.llm_max_tokens,
+            max_completion_tokens=self.settings.llm_max_tokens,
         )
         return self._content(response)
 
