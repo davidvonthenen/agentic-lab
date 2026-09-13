@@ -51,7 +51,7 @@ services:
         aliases: [opensearch-single-dashboards]
 
   lab:
-    image: docker.io/davidvonthenen/netapp-instaclustr-agentic-lab:0.0.10
+    image: docker.io/davidvonthenen/netapp-instaclustr-agentic-lab:0.0.12
     container_name: agentic-lab
     working_dir: /workspace/agentic-rag
     stdin_open: true

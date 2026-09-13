@@ -258,20 +258,35 @@ class NemotronOrchestrator:
                     )
 
                 try:
-                    response = await client.chat.completions.create(
-                        model=self.settings.orch_model,
-                        messages=[
-                            {"role": "system", "content": system_prompt},
-                            {
-                                "role": "user",
-                                "content": json.dumps(
-                                    payload, ensure_ascii=False, sort_keys=True
-                                ),
-                            },
-                        ],
-                        temperature=0.0,
-                        max_completion_tokens=self.settings.orch_max_tokens,
-                    )
+                    if self.settings.use_openai:
+                        response = await client.chat.completions.create(
+                            model=self.settings.orch_model,
+                            messages=[
+                                {"role": "system", "content": system_prompt},
+                                {
+                                    "role": "user",
+                                    "content": json.dumps(
+                                        payload, ensure_ascii=False, sort_keys=True
+                                    ),
+                                },
+                            ],
+                            max_completion_tokens=self.settings.orch_max_tokens,
+                        )
+                    else:
+                        response = await client.chat.completions.create(
+                            model=self.settings.orch_model,
+                            messages=[
+                                {"role": "system", "content": system_prompt},
+                                {
+                                    "role": "user",
+                                    "content": json.dumps(
+                                        payload, ensure_ascii=False, sort_keys=True
+                                    ),
+                                },
+                            ],
+                            temperature=0.0,
+                            max_completion_tokens=self.settings.orch_max_tokens,
+                        )
                     content = self._response_content(response)
                     parsed = schema.model_validate(_json_object(content))
                     if validator is not None:
@@ -462,23 +477,41 @@ class NemotronOrchestrator:
                     )
 
                 try:
-                    response = await client.chat.completions.create(
-                        model=self.settings.llm_model,
-                        messages=[
-                            {"role": "system", "content": SYNTHESIS_SYSTEM_PROMPT},
-                            {
-                                "role": "user",
-                                "content": json.dumps(
-                                    payload,
-                                    ensure_ascii=False,
-                                    sort_keys=True,
-                                ),
-                            },
-                        ],
-                        temperature=self.settings.llm_temperature,
-                        top_p=self.settings.llm_top_p,
-                        max_completion_tokens=self.settings.llm_max_tokens,
-                    )
+                    if self.settings.use_openai:
+                        response = await client.chat.completions.create(
+                            model=self.settings.llm_model,
+                            messages=[
+                                {"role": "system", "content": SYNTHESIS_SYSTEM_PROMPT},
+                                {
+                                    "role": "user",
+                                    "content": json.dumps(
+                                        payload,
+                                        ensure_ascii=False,
+                                        sort_keys=True,
+                                    ),
+                                },
+                            ],
+                            max_completion_tokens=self.settings.llm_max_tokens,
+                        )
+                    else:
+                        response = await client.chat.completions.create(
+                            model=self.settings.llm_model,
+                            messages=[
+                                {"role": "system", "content": SYNTHESIS_SYSTEM_PROMPT},
+                                {
+                                    "role": "user",
+                                    "content": json.dumps(
+                                        payload,
+                                        ensure_ascii=False,
+                                        sort_keys=True,
+                                    ),
+                                },
+                            ],
+                            temperature=self.settings.llm_temperature,
+                            top_p=self.settings.llm_top_p,
+                            max_completion_tokens=self.settings.llm_max_tokens,
+                        )
+
                     content = self._response_content(response)
                     validator(content)
                     trace = ModelCallTrace(
