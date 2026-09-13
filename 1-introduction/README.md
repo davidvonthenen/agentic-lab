@@ -87,7 +87,7 @@ sysctl vm.max_map_count
 Open the repository or extracted workshop distribution on your **host**. From its root, run:
 
 ```bash
-cd episodes/01-introduction-to-the-solution
+cd 01-introduction
 ```
 
 Keep this host terminal in that directory for all `podman compose` commands. It contains the supplied `docker-compose.yml`, Dockerfile, environment templates, and validation script. You do not need to write these files or install Python on the host for the default path.
@@ -210,7 +210,7 @@ Compatibility is not identical behavior. Models differ in sampling parameters, t
 From the **host episode directory**, run:
 
 ```bash
-podman compose up -d --build
+podman compose up -d
 podman compose ps
 ```
 

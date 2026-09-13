@@ -1,9 +1,3 @@
-# Run from this directory: podman compose up -d --build
-# Publisher: replace the repository URL below; prefer a release tag or full commit.
-x-lab-repository: &lab-repository
-  LAB_REPO_URL: ${LAB_REPO_URL:-https://github.com/REPLACE_WITH_OWNER/REPLACE_WITH_REPOSITORY.git}
-  LAB_REPO_REF: ${LAB_REPO_REF:-main}
-
 services:
   opensearch:
     image: docker.io/opensearchproject/opensearch:3.5.0
@@ -57,13 +51,8 @@ services:
         aliases: [opensearch-single-dashboards]
 
   lab:
-    image: localhost/agentic-ai-lab:episode-1
+    image: docker.io/davidvonthenen/netapp-instaclustr-agentic-lab:0.0.2
     container_name: agentic-lab
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args: *lab-repository
-    # No platform is forced: Apple Silicon uses the native Linux ARM64 images.
     working_dir: /workspace/agentic-rag
     stdin_open: true
     tty: true
@@ -86,12 +75,6 @@ services:
       EXTERNAL_LLM_API_KEY: ${EXTERNAL_LLM_API_KEY:-}
       EXTERNAL_LLM_MODEL: ${EXTERNAL_LLM_MODEL:-}
       EXTERNAL_LLM_MAX_TOKENS: ${EXTERNAL_LLM_MAX_TOKENS:-128000}
-    # volumes:
-    #   - lab-workspace:/workspace/agentic-rag
-    #   - huggingface-cache:/home/lab/.cache/huggingface
-    # ports:
-    #   # Reserved for the Orchestrator in Episode 4; not listening in Episode 1.
-    #   - "127.0.0.1:10000:10000"
     depends_on:
       - opensearch
       - dashboards
@@ -102,9 +85,3 @@ networks:
   opensearch-net:
     name: opensearch-net
     driver: bridge
-
-# volumes:
-#   opensearch-data:
-#   opensearch-snapshots:
-#   lab-workspace:
-#   huggingface-cache:

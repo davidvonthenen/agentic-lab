@@ -16,7 +16,7 @@ if [[ ! -d "$TARGET_REPO/.git" ]]; then
     echo "Initialized the persistent lab workspace from the image's Git clone."
 fi
 
-for component in news_agent financials_agent orchestrator_agent; do
+for component in 2-news-agent 3-financials-agent 4-orchestrator-agent 5-client; do
     if [[ ! -f "$TARGET_REPO/$component/Makefile" ]]; then
         echo "ERROR: Missing $component/Makefile in $TARGET_REPO" >&2
         exit 1
