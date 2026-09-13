@@ -51,7 +51,7 @@ services:
         aliases: [opensearch-single-dashboards]
 
   lab:
-    image: docker.io/davidvonthenen/netapp-instaclustr-agentic-lab:0.0.12
+    image: docker.io/davidvonthenen/netapp-instaclustr-agentic-lab-dev:0.0.13
     container_name: agentic-lab
     working_dir: /workspace/agentic-rag
     stdin_open: true
@@ -70,11 +70,11 @@ services:
       EXTERNAL_ORCH_URL: ${EXTERNAL_ORCH_URL:-}
       EXTERNAL_ORCH_API_KEY: ${EXTERNAL_ORCH_API_KEY:-}
       EXTERNAL_ORCH_MODEL: ${EXTERNAL_ORCH_MODEL:-}
-      EXTERNAL_ORCH_MAX_TOKENS: ${EXTERNAL_ORCH_MAX_TOKENS:-128000}
+      EXTERNAL_ORCH_MAX_TOKENS: ${EXTERNAL_ORCH_MAX_TOKENS:-127000}
       EXTERNAL_LLM_URL: ${EXTERNAL_LLM_URL:-}
       EXTERNAL_LLM_API_KEY: ${EXTERNAL_LLM_API_KEY:-}
       EXTERNAL_LLM_MODEL: ${EXTERNAL_LLM_MODEL:-}
-      EXTERNAL_LLM_MAX_TOKENS: ${EXTERNAL_LLM_MAX_TOKENS:-128000}
+      EXTERNAL_LLM_MAX_TOKENS: ${EXTERNAL_LLM_MAX_TOKENS:-127000}
     depends_on:
       - opensearch
       - dashboards
