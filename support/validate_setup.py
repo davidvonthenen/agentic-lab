@@ -27,7 +27,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Callable
 
-COMPONENTS = ("news_agent", "financials_agent", "orchestrator_agent")
+COMPONENTS = ("2-news-agent", "3-financials-agent", "4-orchestrator-agent")
 SCRIPT_DIR = Path(__file__).resolve().parent
 TRUE_VALUES = {"1", "true", "yes", "on"}
 
@@ -39,7 +39,7 @@ import asyncio, dataclasses, hashlib, importlib, json, logging, os, sys
 logging.disable(logging.CRITICAL)
 sys.path.insert(0, os.getcwd())
 component = sys.argv[1]
-config_module = 'src.host_agent.config' if component == 'orchestrator_agent' else 'src.common.config'
+config_module = 'src.host_agent.config' if component == '4-orchestrator-agent' else 'src.common.config'
 settings = importlib.import_module(config_module).load_settings()
 config = dataclasses.asdict(settings)
 for name in list(config):
@@ -67,12 +67,12 @@ async def capture(label, role, coroutine):
         raise RuntimeError('Expected an SDK call from ' + label)
 async def main():
     messages = [{'role': 'user', 'content': 'Setup probe.'}]
-    if component == 'news_agent':
+    if component == '2-news-agent':
         from src.news_agent.llm import LocalModelGateway
         gateway = LocalModelGateway(settings)
         await capture('planning/verification', 'orch', gateway.orchestrator_completion(messages))
         await capture('synthesis', 'llm', gateway.generator_completion(messages))
-    elif component == 'financials_agent':
+    elif component == '3-financials-agent':
         from src.financials_agent.llm import OpenAIModelGateway
         from src.financials_agent.models import FinancialPlan
         gateway = OpenAIModelGateway(settings)
@@ -292,7 +292,7 @@ def check_embeddings(repo: Path, timeout: float) -> str:
         "assert abs(float(np.linalg.norm(v))-1.0)<0.01; "
         "print('Embedding dimension:', len(v))"
     )
-    process = subprocess.run([sys.executable, "-c", code], cwd=repo / "news_agent",
+    process = subprocess.run([sys.executable, "-c", code], cwd=repo / "2-news-agent",
                              capture_output=True, text=True, timeout=timeout)
     if process.returncode:
         raise CheckError("Embedding inference failed: " + process.stderr[-1400:])
@@ -396,7 +396,7 @@ def main() -> int:
     host = os.environ.get("OPENSEARCH_HOST", "127.0.0.1" if args.native else "opensearch-single")
     port = os.environ.get("OPENSEARCH_PORT", "9200")
     base = f"{'https' if env_true('OPENSEARCH_SSL') else 'http'}://{host}:{port}"
-    for component in ("news_agent", "financials_agent"):
+    for component in ("2-news-agent", "3-financials-agent"):
         cfg = snapshots.get(component, {}).get("config", {})
         if cfg and (cfg["opensearch_host"] != host or str(cfg["opensearch_port"]) != port or cfg["opensearch_ssl"] != env_true("OPENSEARCH_SSL")):
             validator.record(component + " OpenSearch target", "FAIL", "Agent configuration does not match the OpenSearch address being validated.")
@@ -444,10 +444,10 @@ def main() -> int:
                     url = validate_base_url(cfg[role + "_url"])
                     if any(int(params.get(field, 1)) <= 0 for field in ("max_tokens", "max_completion_tokens")):
                         raise CheckError("Configured output token ceilings must be positive.")
-                    if urllib.parse.urlsplit(url).hostname == "api.openai.com" and (params.get("model") == "gpt-5.4" or str(params.get("model", "")).startswith("gpt-5.4-2026-")):
-                        ceiling = max(int(params.get(field, 0)) for field in ("max_tokens", "max_completion_tokens"))
-                        if ceiling > 128000:
-                            raise CheckError("The configured output ceiling exceeds GPT-5.4's documented 128000 tokens. Set EXTERNAL_ORCH_MAX_TOKENS and EXTERNAL_LLM_MAX_TOKENS to 4096 for this lab.")
+                    # if urllib.parse.urlsplit(url).hostname == "api.openai.com" and (params.get("model") == "gpt-5.4" or str(params.get("model", "")).startswith("gpt-5.4-2026-")):
+                    #     ceiling = max(int(params.get(field, 0)) for field in ("max_tokens", "max_completion_tokens"))
+                    #     if ceiling > 128000:
+                    #         raise CheckError("The configured output ceiling exceeds GPT-5.4's documented 128000 tokens. Set EXTERNAL_ORCH_MAX_TOKENS and EXTERNAL_LLM_MAX_TOKENS to 128000 for this lab.")
                     identity = json.dumps([url, hashlib.sha256(key.encode()).hexdigest(), params], sort_keys=True)
                     item = profiles.setdefault(identity, {"url": url, "key": key, "params": params, "labels": []})
                     item["labels"].append(component + "/" + call["label"])

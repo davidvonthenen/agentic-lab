@@ -179,7 +179,7 @@ def _run_gguf_chat_completion(
     messages: List[Dict[str, str]],
     temperature: float,
     top_p: float,
-    max_tokens: int,
+    max_completion_tokens: int,
 ) -> Tuple[str, Optional[Dict[str, Any]]]:
     """Generate a chat completion with llama.cpp."""
     llm = _load_local_llm()
@@ -187,7 +187,7 @@ def _run_gguf_chat_completion(
         messages=messages,
         temperature=temperature,
         top_p=top_p,
-        max_tokens=max_tokens,
+        max_completion_tokens=max_completion_tokens,
     )
 
     content = ""
@@ -206,7 +206,7 @@ def _run_mlx_chat_completion(
     messages: List[Dict[str, str]],
     temperature: float,
     top_p: float,
-    max_tokens: int,
+    max_completion_tokens: int,
 ) -> Tuple[str, Dict[str, Any]]:
     """Generate a chat completion with mlx-lm."""
     from mlx_lm import generate
@@ -220,7 +220,7 @@ def _run_mlx_chat_completion(
             model,
             tokenizer,
             prompt=prompt,
-            max_tokens=max_tokens,
+            max_completion_tokens=max_completion_tokens,
             sampler=sampler,
             verbose=False,
         )
@@ -289,7 +289,7 @@ def create_app() -> Flask:
 
         temperature = float(payload.get("temperature", 0.2))
         top_p = float(payload.get("top_p", 0.9))
-        max_tokens = int(payload.get("max_tokens", 65536))
+        max_completion_tokens = int(payload.get("max_completion_tokens", 65536))
         model = str(payload.get("model") or settings.llm_server_model)
 
         if settings.llm_runtime == "mlx":
@@ -298,7 +298,7 @@ def create_app() -> Flask:
                 messages=messages,
                 temperature=temperature,
                 top_p=top_p,
-                max_tokens=max_tokens,
+                max_completion_tokens=max_completion_tokens,
             )
         else:
             content, usage = _run_gguf_chat_completion(
@@ -306,7 +306,7 @@ def create_app() -> Flask:
                 messages=messages,
                 temperature=temperature,
                 top_p=top_p,
-                max_tokens=max_tokens,
+                max_completion_tokens=max_completion_tokens,
             )
 
         return jsonify(_build_chat_response(model=model, content=content, usage=usage)), 200

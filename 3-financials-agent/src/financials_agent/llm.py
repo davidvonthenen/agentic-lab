@@ -75,7 +75,7 @@ class OpenAIModelGateway:
                 "messages": messages,
                 "temperature": temperature,
                 "top_p": self.settings.llm_top_p,
-                "max_tokens": max_tokens,
+                "max_completion_tokens": max_tokens,
             },
         )
         try:
@@ -84,7 +84,7 @@ class OpenAIModelGateway:
                 messages=messages,
                 temperature=temperature,
                 top_p=self.settings.llm_top_p,
-                max_tokens=max_tokens,
+                max_completion_tokens=max_tokens,
             )
             content = response.choices[0].message.content
             if not content or not content.strip():
@@ -155,7 +155,7 @@ class OpenAIModelGateway:
             model=self.settings.orch_model,
             messages=messages,
             temperature=0.0,
-            max_tokens=min(self.settings.orch_max_tokens, 2048),
+            max_completion_tokens=min(self.settings.orch_max_tokens, 2048),
         )
 
     async def synthesize(
@@ -181,7 +181,7 @@ class OpenAIModelGateway:
                 previous_answer=previous_answer,
             ),
             temperature=self.settings.llm_temperature,
-            max_tokens=self.settings.llm_max_tokens,
+            max_completion_tokens=self.settings.llm_max_tokens,
         )
 
     async def verify(
@@ -197,7 +197,7 @@ class OpenAIModelGateway:
             model=self.settings.orch_model,
             messages=release_verifier_messages(question, answer, evidence),
             temperature=self.settings.orch_temperature,
-            max_tokens=self.settings.orch_max_tokens,
+            max_completion_tokens=self.settings.orch_max_tokens,
         )
 
 
