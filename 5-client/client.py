@@ -27,9 +27,9 @@ while True:
     start_time = time.time()
 
     response = client.chat.completions.create(
-        model="vertical-api-orchestrator",
+        model="instaclustr-labs-orchestrator",
         messages=messages,
-        user="api-world-demo",
+        user="instaclustr-labs",
     )
 
     # end time
