@@ -7,14 +7,10 @@ services:
       DISABLE_SECURITY_PLUGIN: "true"
       DISABLE_INSTALL_DEMO_CONFIG: "true"
       cluster.routing.allocation.disk.threshold_enabled: "false"
-      # path.repo: /mnt/snapshots
       OPENSEARCH_JAVA_OPTS: "-Xms1g -Xmx1g"
     ports:
       - "127.0.0.1:9200:9200"
       - "127.0.0.1:9600:9600"
-    # volumes:
-    #   - opensearch-data:/usr/share/opensearch/data
-    #   - opensearch-snapshots:/mnt/snapshots
     ulimits:
       nofile:
         soft: 65536

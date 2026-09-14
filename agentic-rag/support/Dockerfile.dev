@@ -35,10 +35,10 @@ RUN LAB_REPO_URL="${LAB_REPO_URL}" python -c \
 
 # Sparse checkout the exact target path to minimize container size, then discard .git
 RUN git clone --filter=blob:none --no-checkout "${LAB_REPO_URL}" /tmp/repo \
-    && git -C /tmp/repo sparse-checkout set agentic-rag/agentic-rag \
+    && git -C /tmp/repo sparse-checkout set agentic-rag \
     && git -C /tmp/repo checkout "${LAB_REPO_REF}" \
     && git -C /tmp/repo rev-parse HEAD > /opt/lab/repository-revision.txt \
-    && mv /tmp/repo/agentic-rag/agentic-rag /opt/lab/repository \
+    && mv /tmp/repo/agentic-rag /opt/lab/repository \
     && rm -rf /tmp/repo \
     && test -f /opt/lab/repository/2-news-agent/Makefile \
     && test -f /opt/lab/repository/3-financials-agent/Makefile \
