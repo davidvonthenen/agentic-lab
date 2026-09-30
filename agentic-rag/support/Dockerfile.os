@@ -1,3 +1,6 @@
+# Copyright 2026 NetApp Instaclustr contributors. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 FROM docker.io/opensearchproject/opensearch:3.5.0
 
 USER root

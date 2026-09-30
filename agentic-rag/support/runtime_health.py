@@ -1,3 +1,6 @@
+# Copyright 2026 NetApp Instaclustr contributors. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 #!/usr/bin/env python3
 """Keep the workshop container alive; expose readiness without serving files."""
 from __future__ import annotations
