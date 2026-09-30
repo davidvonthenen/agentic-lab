@@ -1,4 +1,4 @@
-[Episode 3: Financials Expert](../tasks/financials-agent.md)
+[Task 3: Financials Expert](../tasks/financials-agent.md)
 
 ## Troubleshooting reference
 
@@ -12,7 +12,7 @@
 | Finnhub MCP starts but quotes fail | Test the adapter, not only startup. Check the key in Terminal A, provider authorization/quota, and its error logs. |
 | Quote timestamp is old or price fields are absent | Treat the result as limited evidence. The code has no hard freshness threshold; do not relabel retrieval time as market time. |
 | Port `8766` or `9002` is occupied | Reuse or stop the earlier foreground process before starting another. |
-| Health passes but expert requests fail | Health does not probe dependencies. Use the direct retrieval/MCP checks and the validated Episode 1 model profile. |
+| Health passes but expert requests fail | Health does not probe dependencies. Use the direct retrieval/MCP checks and the validated Task 1 model profile. |
 | Model provider rejects parameters or token budget | Inspect Terminal B and the effective model settings. Restore the validated profile rather than disabling governance or upgrading dependencies during the lab. |
 | Direct query times out during a slow request | The client uses a 120-second HTTP timeout; model loading/calls can take longer. Check Terminal B for completion and the audit before submitting another request. |
 | No quote after a company-name request | Inspect symbol-resolution evidence. A failed lookup is not permission to substitute a similarly named issuer. |

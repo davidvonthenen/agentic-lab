@@ -1,4 +1,4 @@
-[Episode 5: Run the Client End-to-End](../tasks/client.md)
+[Task 5: Run the Client End-to-End](../tasks/client.md)
 
 ## Troubleshooting reference
 

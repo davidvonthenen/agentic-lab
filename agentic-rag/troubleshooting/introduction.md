@@ -25,5 +25,5 @@ podman compose up -d --force-recreate --no-deps lab
 podman compose exec lab bash
 ```
 
-Container recreation terminates any running application processes and existing shells. The workspace and model cache remain in their volumes. Reopen shells and restart any later-episode services. `podman compose restart lab` does **not** apply a changed container environment.
+Container recreation terminates any running application processes and existing shells. The workspace and model cache remain in their volumes. Reopen shells and restart any later-task services. `podman compose restart lab` does **not** apply a changed container environment.
 

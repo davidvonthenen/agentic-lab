@@ -1,8 +1,8 @@
-[Episode 5: Run the Client End-to-End](../tasks/client.md)
+[Task 5: Run the Client End-to-End](../tasks/client.md)
 
 ## Source map
 
-These links identify the implementation used by this episode. The audit references are for inspecting the completed client request, not for restarting or reimplementing the earlier components.
+These links identify the implementation used by this task. The audit references are for inspecting the completed client request, not for restarting or reimplementing the earlier components.
 
 | File | Responsibility |
 |---|---|

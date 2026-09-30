@@ -1,8 +1,8 @@
-# Episode 4: Orchestrator Expert
+# Task 4: Orchestrator Expert
 
 A research question can cross more than one domain. Understanding what a technology company is building requires different evidence from understanding its reported financial results. Combining those answers should not erase who supplied each fact, which rules applied, or what the evidence could not establish.
 
-In this episode, you run the **Orchestrator Expert**, the coordination layer in this lab's **Mixture of Experts (MoE)** architecture. It determines which expert should participate, delegates through Agent2Agent (A2A), evaluates whether the bounded workflow should continue, and coordinates the final response. The important take away, it does not contribute to the final composed answer to the client.
+In this task, you run the **Orchestrator Expert**, the coordination layer in this lab's **Mixture of Experts (MoE)** architecture. It determines which expert should participate, delegates through Agent2Agent (A2A), evaluates whether the bounded workflow should continue, and coordinates the final response. The important take away, it does not contribute to the final composed answer to the client.
 
 The research goal is to connect technology developments with financial observations while preserving their evidence boundaries. An announcement and a stock quote can appear in the same answer. Their coexistence does not prove that the announcement caused the price. The Orchestrator must preserve that distinction when it combines independently produced results.
 
@@ -10,7 +10,7 @@ The research goal is to connect technology developments with financial observati
 
 ## What you will learn
 
-The preceding episodes established the independently governed experts. Here, the focus shifts from **how an expert answers** to **how several experts cooperate without losing their responsibilities**.
+The preceding tasks established the independently governed experts. Here, the focus shifts from **how an expert answers** to **how several experts cooperate without losing their responsibilities**.
 
 | Step | Activity | Checkpoint |
 |---|---|---|
@@ -21,7 +21,7 @@ The preceding episodes established the independently governed experts. Here, the
 | 5 | Test synthesis and release boundaries with synthetic evidence. | Citation provenance is distinguishable from claim correctness. |
 | 6 | Start the Orchestrator and check its HTTP input contract. | The service responds without invoking a model or expert. |
 
-The local exercises inspect application code and use synthetic fixtures where needed. They do not introduce a conversation application. End-to-end interaction belongs to Episode 5.
+The local exercises inspect application code and use synthetic fixtures where needed. They do not introduce a conversation application. End-to-end interaction belongs to Task 5.
 
 ## Understand the Mixture of Experts before starting it
 
@@ -63,7 +63,7 @@ The completion model does **not** receive expert response prose or retrieved pas
 
 ## Before you begin
 
-Complete Episode 1's environment and model validation. Leave the services established in [Episode 2](news-agent.md) and [Episode 3](financials-agent.md) running.
+Complete Task 1's environment and model validation. Leave the services established in [Task 2](news-agent.md) and [Task 3](financials-agent.md) running.
 
 The existing Compose environment must contain the `lab`, `opensearch`, and `dashboards` services.
 
@@ -75,9 +75,9 @@ Open two additional **host terminals**. From the host directory containing the C
 podman compose exec lab bash
 ```
 
-When the environment was started with Podman, use `podman compose exec lab bash` instead. Keep using the engine selected in Episode 1.
+When the environment was started with Podman, use `podman compose exec lab bash` instead. Keep using the engine selected in Task 1.
 
-In both **container shells**, enter the episode directory:
+In both **container shells**, enter the task directory:
 
 ```bash
 cd /workspace/agentic-rag/4-orchestrator-agent
@@ -188,7 +188,7 @@ PY
 
 **Expected:** both cards are returned. The dependency file pins `a2a-sdk` to `1.1.2`. The supplied expert code advertises JSON-RPC interfaces using **protocol version `1.0`** and an endpoint at `/` on each expert's port. The SDK package version and advertised protocol version are different values; do not use them interchangeably or append an assumed `/a2a` path.
 
-Discovery checks the advertised interface, not the expert's downstream dependencies or the quality of its evidence. A successful card response does not establish that a subsequent research task will succeed. For a missing card or unreachable URL, return to the existing service terminal and the relevant earlier episode before proceeding.
+Discovery checks the advertised interface, not the expert's downstream dependencies or the quality of its evidence. A successful card response does not establish that a subsequent research task will succeed. For a missing card or unreachable URL, return to the existing service terminal and the relevant earlier task before proceeding.
 
 ### What crosses the boundary during execution?
 
@@ -430,7 +430,7 @@ make agent
 
 ## Completion checkpoint
 
-You have completed this episode! Leave the **Orchestrator terminal** and earlier services running when continuing.
+You have completed this task! Leave the **Orchestrator terminal** and earlier services running when continuing.
 
 The central MoE lesson is that:
 - **delegation must preserve authority and provenance**
@@ -439,7 +439,7 @@ The central MoE lesson is that:
 - **Synthesis joins results without acquiring a new evidence source.**
 - **Verification and auditing make the implemented boundaries observable, including where they remain incomplete.*
 
-Continue to [Episode 5](client.md), or return to the [workshop episode index](../README.md).
+Continue to [Task 5](client.md), or return to the [workshop task index](../README.md).
 
 [Troubleshooting reference](../troubleshooting/orcheestrator-agent.md)
 

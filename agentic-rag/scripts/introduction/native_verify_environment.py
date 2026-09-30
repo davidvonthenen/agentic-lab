@@ -1,7 +1,7 @@
 # Copyright 2026 NetApp Instaclustr contributors. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Verify Episode 1 prerequisites without loading another copy of either model."""
+"""Verify Task 1 prerequisites without loading another copy of either model."""
 from __future__ import annotations
 
 import argparse

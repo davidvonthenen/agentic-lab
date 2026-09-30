@@ -4,18 +4,18 @@ This workshop builds a technology-company research assistant with three responsi
 
 This is a **Mixture of Experts at the application level**: independently governed agents own different kinds of questions. The Orchestrator's **reinforcement loop** is a bounded feedback loop-plan, delegate, evaluate, and correct or stop.
 
-In this episode, you prepare the environment that supports those experts. You will start OpenSearch, OpenSearch Dashboards, and a Python workspace container. You will also configure external inference and verify that the workspace can use it.
+In this task, you prepare the environment that supports those experts. You will start OpenSearch, OpenSearch Dashboards, and a Python workspace container. You will also configure external inference and verify that the workspace can use it.
 
 ![Technology-company research agent architecture](../images/introduction/demo-architecture-simplistic-final.png)
 
-The diagram shows the complete solution. Its Nemotron Orchestrator and LLM Reasoning boxes represent separate **roles**. With this episode's default OpenAI configuration, both roles use `gpt-5.4`. The optional Nebius configuration uses different models for planning and generation.
+The diagram shows the complete solution. Its Nemotron Orchestrator and LLM Reasoning boxes represent separate **roles**. With this task's default OpenAI configuration, both roles use `gpt-5.4`. The optional Nebius configuration uses different models for planning and generation.
 
 ## What each component does
 
 | Component | Function in the lab | What crosses its boundary |
 |---|---|---|
 | Python workspace (`lab`) | Provides Python 3.12, the supplied dependencies, Git, Make, and a persistent checkout of the lab repository. Later, you will start each application process in a separate terminal inside this container. | Source files, local embeddings, API requests, retrieved evidence, and responses. |
-| OpenSearch | Stores and retrieves the news and SEC-filing chunks that you ingest in later episodes. | Document chunks, metadata, embedding vectors, and retrieval queries/results. |
+| OpenSearch | Stores and retrieves the news and SEC-filing chunks that you ingest in later tasks. | Document chunks, metadata, embedding vectors, and retrieval queries/results. |
 | OpenSearch Dashboards | Provides a browser interface for inspecting OpenSearch and running diagnostic queries. | OpenSearch API requests and inspection results. |
 | External model provider | Runs the planning/verification and answer-generation models. No local text-generation model server is started. | Prompts, selected evidence, and model responses over HTTPS. |
 
@@ -82,7 +82,7 @@ sysctl vm.max_map_count
 
 **Expected:** `vm.max_map_count = 262144`, or a larger existing value. A temporary `sysctl -w` setting may need to be reapplied after restarting the VM or host. For a persistent Linux setting, an administrator can place `vm.max_map_count=262144` in a file under `/etc/sysctl.d/` and run `sudo sysctl --system` in the same Linux environment.
 
-## Step 1: open the episode directory
+## Step 1: open the task directory
 
 Open the repository or extracted workshop distribution on your **host**. From its root, run:
 
@@ -206,7 +206,7 @@ Compatibility is not identical behavior. Models differ in sampling parameters, t
 
 ## Step 3: start the three containers
 
-From the **host episode directory**, run:
+From the **host task directory**, run:
 
 ```bash
 podman compose up -d
@@ -235,11 +235,11 @@ podman compose logs --tail 80 lab
 | Future Orchestrator API | `http://localhost:10000` | `http://127.0.0.1:10000` |
 | External inference | Not used by the host in this path | Your configured HTTPS API base URL |
 
-Inside a container, `localhost` refers to that container. Therefore, `OPENSEARCH_HOST` is `opensearch-single`, not `localhost`. Later, the specialists, their MCP servers, and the Orchestrator all run inside the **same** `lab` container, so their existing loopback addresses remain valid. Publishing port `10000` reserves access for a later episode; no Orchestrator listens there yet.
+Inside a container, `localhost` refers to that container. Therefore, `OPENSEARCH_HOST` is `opensearch-single`, not `localhost`. Later, the specialists, their MCP servers, and the Orchestrator all run inside the **same** `lab` container, so their existing loopback addresses remain valid. Publishing port `10000` reserves access for a later task; no Orchestrator listens there yet.
 
 ## Step 4: enter the Python workspace
 
-From the **host episode directory**:
+From the **host task directory**:
 
 ```bash
 podman compose exec lab bash
@@ -256,13 +256,13 @@ ls 2-news-agent 3-financials-agent 4-orchestrator-agent
 
 **Expected:** the working directory is `/workspace/agentic-rag`, Python reports `3.12.x`, pip reports no broken requirements, and all three application directories exist.
 
-To open another session, use a **new host terminal**, return to this episode directory, and repeat:
+To open another session, use a **new host terminal**, return to this task directory, and repeat:
 
 ```bash
 podman compose exec lab bash
 ```
 
-Each command opens a shell in the **same container and repository**, not a new container. This is how later episodes keep a server running in one terminal while a client runs in another. Shell-local exports do not propagate to sibling shells, so configure provider values through Compose before opening those sessions. Leaving a shell with `exit` does not stop the workspace container. Do not close a future service's foreground terminal while that service is still needed.
+Each command opens a shell in the **same container and repository**, not a new container. This is how later tasks keep a server running in one terminal while a client runs in another. Shell-local exports do not propagate to sibling shells, so configure provider values through Compose before opening those sessions. Leaving a shell with `exit` does not stop the workspace container. Do not close a future service's foreground terminal while that service is still needed.
 
 ## Step 5: validate the environment
 
@@ -288,16 +288,16 @@ An illustrative successful run ends with:
 [PASS] Model: ...
 [WARN] Full output ceilings: ...
 [SKIP] Embedding model download: Optional. ...
-[SKIP] Later-episode services: ...
+[SKIP] Later-task services: ...
 
-READY FOR EPISODE 2
+READY FOR TASK 2
 ```
 
-This is example output, not a promise that an unconfigured provider account will pass. A warning about full output ceilings means the small probes did not certify a provider's larger configured token budget. Optional embedding checks and later-episode service checks are skipped intentionally.
+This is example output, not a promise that an unconfigured provider account will pass. A warning about full output ceilings means the small probes did not certify a provider's larger configured token budget. Optional embedding checks and later-task service checks are skipped intentionally.
 
 | Exit code | Meaning | Next action |
 |---|---|---|
-| `0` | Required Episode 1 checks passed. | Continue, after reviewing warnings. |
+| `0` | Required Task 1 checks passed. | Continue, after reviewing warnings. |
 | `1` | At least one required check failed. | Resolve the reported failure and rerun. |
 | `2` | Infrastructure checks completed, but model checks were deliberately skipped. | Run without `--skip-models` before continuing. |
 
@@ -313,14 +313,14 @@ To also download/cache the embedding model and validate a finite, normalized vec
 python /opt/lab/validate_setup.py --check-embeddings
 ```
 
-The first embedding check can take several minutes and requires disk space for the weights. Later checks reuse the cache. This option is useful before Episode 2; a normal successful run verifies package imports but does not claim that model weights have already been downloaded.
+The first embedding check can take several minutes and requires disk space for the weights. Later checks reuse the cache. This option is useful before Task 2; a normal successful run verifies package imports but does not claim that model weights have already been downloaded.
 
 
 [Troubleshoot the failed check, not a different layer](../troubleshooting/introduction.md)
 
 ## Pause or stop the lab
 
-Exit container shells, then run these commands from the **host episode directory**.
+Exit container shells, then run these commands from the **host task directory**.
 
 To stop the services while keeping their containers and data:
 
@@ -346,6 +346,6 @@ Run `podman compose up -d` to recreate them.
 
 You now have a shared network, a reproducible Python workspace, and separate configuration for planning and generation.
 
-A successful Episode 1 run means the infrastructure and model requests passed.
+A successful Task 1 run means the infrastructure and model requests passed.
 
-Continue to [Episode 2: News Expert](news-agent.md), or return to the [workshop episode index](../README.md#episodes). 
+Continue to [Task 2: News Expert](news-agent.md), or return to the [workshop task index](../README.md#tasks). 
