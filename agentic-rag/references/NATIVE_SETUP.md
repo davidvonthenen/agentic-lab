@@ -1,6 +1,6 @@
 # Native Python and model-service setup
 
-This is the alternative to the Python lab container in [Episode 1](../tasks/introduction.md). Python, dependencies, and model weights live in your own environment. OpenSearch and Dashboards still use the provided Compose definition, but you start only those two containers.
+This is the alternative to the Python lab container in [Task 1](../tasks/introduction.md). Python, dependencies, and model weights live in your own environment. OpenSearch and Dashboards still use the provided Compose definition, but you start only those two containers.
 
 Choose one path. Native macOS on Apple Silicon uses the application's MLX runtime. Native Linux uses GGUF. On Windows, this guide uses an Ubuntu 24.04 WSL2 environment for Python and Make; it does not claim to configure a Windows-native C++ build of `llama-cpp-python`.
 
@@ -61,7 +61,7 @@ CMAKE_ARGS='-DGGML_METAL=ON' \
 python -m pip check
 ```
 
-`llama-cpp-python` remains installed because it is in the supplied requirements, even though the native macOS workflow selects MLX. The runtime-specific imports in this episode prevent an unused backend from being imported during another backend's startup.
+`llama-cpp-python` remains installed because it is in the supplied requirements, even though the native macOS workflow selects MLX. The runtime-specific imports in this task prevent an unused backend from being imported during another backend's startup.
 
 On **Linux or WSL2**, install CPU PyTorch first, then the same dependency list:
 
@@ -120,7 +120,7 @@ podman compose -f scripts/introduction/docker-compose.yaml ps
 
 Do not start the `lab` service for this path. It would publish the same model ports that your native Python services need.
 
-On macOS, Podman must have a running machine. On Linux or WSL2, the commands here assume a locally running Podman engine. Check the `vm.max_map_count` troubleshooting in [Episode 1](../troubleshooting/introduction.md#troubleshoot-the-failed-check-not-a-different-layer) if OpenSearch does not become healthy.
+On macOS, Podman must have a running machine. On Linux or WSL2, the commands here assume a locally running Podman engine. Check the `vm.max_map_count` troubleshooting in [Task 1](../troubleshooting/introduction.md#troubleshoot-the-failed-check-not-a-different-layer) if OpenSearch does not become healthy.
 
 Native processes reach the published OpenSearch port through loopback. With your Python virtual environment active:
 
@@ -159,9 +159,9 @@ In a third native terminal, return to the repository root, activate `.venv`, and
 python scripts/introduction/native_verify_environment.py --services
 ```
 
-On Apple Silicon, model health should report `runtime: mlx`. On Linux/WSL2 it should report `runtime: gguf`. Then run the two completion examples in [Episode 1, Step 6](../tasks/introduction.md) directly in this native shell. Skip the `podman exec` instruction; your model processes are running on the host.
+On Apple Silicon, model health should report `runtime: mlx`. On Linux/WSL2 it should report `runtime: gguf`. Then run the two completion examples in [Task 1, Step 6](../tasks/introduction.md) directly in this native shell. Skip the `podman exec` instruction; your model processes are running on the host.
 
-Keep the same environment active for subsequent episodes. You will use `OPENSEARCH_HOST=127.0.0.1`, not the container-only hostname `opensearch-single`, in those native agent processes.
+Keep the same environment active for subsequent tasks. You will use `OPENSEARCH_HOST=127.0.0.1`, not the container-only hostname `opensearch-single`, in those native agent processes.
 
 ## ONLY Upon completion of the lab
 

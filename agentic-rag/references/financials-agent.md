@@ -1,8 +1,8 @@
-[Episode 3: Financial Expert](../tasks/financials-agent.md)
+[Task 3: Financial Expert](../tasks/financials-agent.md)
 
 ## Source map
 
-These are the implementation files used by this episode. When the overview and code differ, follow the current code and rerun the relevant local probe.
+These are the implementation files used by this task. When the overview and code differ, follow the current code and rerun the relevant local probe.
 
 | File | Responsibility |
 |---|---|

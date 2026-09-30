@@ -1,8 +1,8 @@
-[Episode 4: Orchestrator Expert](../tasks/orcheestrator-agent.md)
+[Task 4: Orchestrator Expert](../tasks/orcheestrator-agent.md)
 
 ## Source map
 
-These are the implementation files used by this episode. When the overview and code differ, follow the current code and rerun the relevant local probe.
+These are the implementation files used by this task. When the overview and code differ, follow the current code and rerun the relevant local probe.
 
 | File | Responsibility |
 |---|---|

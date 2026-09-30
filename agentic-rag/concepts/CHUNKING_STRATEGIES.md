@@ -2,13 +2,13 @@
 
 > **IMPORTANT:** This is currently experimental and unverified. Venture at your own risk!
 
-[Return to Episode 2: News Expert](../tasks/news-agent.md)
+[Return to Task 2: News Expert](../tasks/news-agent.md)
 
 Chunking determines which parts of an article can become independently retrievable evidence. The boundary you choose can preserve a claim and its qualification, separate them, or combine the claim with unrelated material. For a governed news application, this is an evidence-design decision as well as a retrieval decision.
 
 This companion explains the workshop's existing implementation, then explores six approaches: fixed-size, semantic or boundary-aware, recursive, adaptive, context-enriched, and AI-driven dynamic chunking. **Only fixed-size splitting with metadata-enriched embedding input is implemented in the supplied ingestion pipeline.** The other approaches below are optional lab experiments, not configuration switches already supported by the expert.
 
-You do not need to run any of these experiments to complete Episode 2. Its OpenSearch index is already populated. Do not recreate or overwrite `techcomp-vector-chunks`.
+You do not need to run any of these experiments to complete Task 2. Its OpenSearch index is already populated. Do not recreate or overwrite `techcomp-vector-chunks`.
 
 ## 1. Start with the actual pipeline
 
@@ -468,7 +468,7 @@ For example, assign `spans = recursive_spans(text, 160)` first. Compare whether 
 
 ## 4. Experiment with actual ingestion only in a separate index
 
-The main episode needs no ingestion. This section is optional and requires an actual CSV file, sufficient disk/memory, and permission to create additional indices. The supplied source archive does not include the dataset itself. A file may be present in the development image, but check rather than assume a path:
+The task needs no ingestion. This section is optional and requires an actual CSV file, sufficient disk/memory, and permission to create additional indices. The supplied source archive does not include the dataset itself. A file may be present in the development image, but check rather than assume a path:
 
 ```bash
 find . -type f -name '*.csv'

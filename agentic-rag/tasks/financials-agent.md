@@ -1,8 +1,8 @@
-# Episode 3: Financials Expert
+# Task 3: Financials Expert
 
 A financial answer can contain accurate numbers and still be misleading. The numbers might belong to another company, describe a different reporting period, or be presented as a current stock price when they came from an older document. A useful expert needs boundaries around both the information it retrieves and the conclusions it releases.
 
-In this episode, you run the **Financial Expert**, the financial-domain application in the lab's **application-level Mixture of Experts (MoE)** architecture. It combines SEC filing passages already stored in OpenSearch with current market information obtained from Finnhub through MCP.
+In this task, you run the **Financial Expert**, the financial-domain application in the lab's **application-level Mixture of Experts (MoE)** architecture. It combines SEC filing passages already stored in OpenSearch with current market information obtained from Finnhub through MCP.
 
 > **IMPORTANT:** Its job is to explain available financial evidence, not provide personalized investment recommendations.
 
@@ -10,7 +10,7 @@ You will inspect the preloaded filings, test both data paths independently, ask 
 
 ## What you will learn
 
-[Episode 2](news-agent.md) introduced vector retrieval, MCP, separate planning and generation roles, and bounded correction. This episode builds on those concepts rather than repeating them. The additional focus is **issuer identity, financial reporting periods, quote timestamps, and the distinction between a valid citation and a verified financial claim**.
+[Task 2](news-agent.md) introduced vector retrieval, MCP, separate planning and generation roles, and bounded correction. This task builds on those concepts rather than repeating them. The additional focus is **issuer identity, financial reporting periods, quote timestamps, and the distinction between a valid citation and a verified financial claim**.
 
 | Step | Activity | Checkpoint |
 |---|---|---|
@@ -35,9 +35,9 @@ A filing passage can support a statement about reported revenue. It cannot estab
 
 ![Financials Expert Architecture](../images/financials-agent/financials-agent-architecture.png)
 
-The shared Agentic RAG pattern is described in [Episode 2](news-agent.md#why-this-is-agentic-rag) in the [Why this is Agentic RAG](news-agent.md#why-this-is-agentic-rag) section. Here, deterministic code first selects permitted source categories and extracts company identity. The internal planner can refine that plan within its boundaries. The application gathers evidence, requests a candidate answer, checks it, and allows one correction before release or withholding. When both source categories are selected, filing retrieval and the market-tool batch run concurrently.
+The shared Agentic RAG pattern is described in [Task 2](news-agent.md#why-this-is-agentic-rag) in the [Why this is Agentic RAG](news-agent.md#why-this-is-agentic-rag) section. Here, deterministic code first selects permitted source categories and extracts company identity. The internal planner can refine that plan within its boundaries. The application gathers evidence, requests a candidate answer, checks it, and allows one correction before release or withholding. When both source categories are selected, filing retrieval and the market-tool batch run concurrently.
 
-The `ORCH` settings name the **planning and advisory-verification model inside this expert**. The `LLM` settings name its answer-generation model. The source retains Nemotron and Qwen names for these roles, but the effective provider and model come from configuration. See [Episode 2's model-role explanation](news-agent.md#why-use-separate-planning-and-generation-models) for that separation.
+The `ORCH` settings name the **planning and advisory-verification model inside this expert**. The `LLM` settings name its answer-generation model. The source retains Nemotron and Qwen names for these roles, but the effective provider and model come from configuration. See [Task 2's model-role explanation](news-agent.md#why-use-separate-planning-and-generation-models) for that separation.
 
 [Implementation: execution workflow](../scripts/financials-agent/src/financials_agent/financials_agent.py)
 [Planning boundaries](../scripts/financials-agent/src/financials_agent/planner.py)
@@ -45,7 +45,7 @@ The `ORCH` settings name the **planning and advisory-verification model inside t
 
 ## Before you begin
 
-Complete Episode 1's environment and model validation. The existing Compose environment must contain the `lab`, `opensearch`, and `dashboards` services. You also need a [Finnhub API key](https://finnhub.io/) for the market-data exercises. The development container already contains the Python environment and dependencies.
+Complete Task 1's environment and model validation. The existing Compose environment must contain the `lab`, `opensearch`, and `dashboards` services. You also need a [Finnhub API key](https://finnhub.io/) for the market-data exercises. The development container already contains the Python environment and dependencies.
 
 Finnhub receives the company/symbol and other arguments for the selected tools, rather than the entire financial question.
 
@@ -57,7 +57,7 @@ Open three **host terminal windows**. In each, enter the existing development co
 podman compose exec lab bash
 ```
 
-Run this from the host directory containing the Compose file. When the environment was started with Podman, use `podman compose exec lab bash` instead. Keep using the engine selected in Episode 1.
+Run this from the host directory containing the Compose file. When the environment was started with Podman, use `podman compose exec lab bash` instead. Keep using the engine selected in Task 1.
 
 In each **container shell**, locate and enter the Financial Expert directory:
 
@@ -114,7 +114,7 @@ for label, value in (
 PY
 ```
 
-**Expected:** OpenSearch is `opensearch-single:9200`; the index is `financial-filings-vector-chunks`; `top_k` and candidates are both `3`; all three check categories are `True`; the audit path defaults to `./logs/financials-audit.jsonl`. The embedding default is `Qwen/Qwen3-Embedding-0.6B`. Model identifiers should match the profile validated in Episode 1.
+**Expected:** OpenSearch is `opensearch-single:9200`; the index is `financial-filings-vector-chunks`; `top_k` and candidates are both `3`; all three check categories are `True`; the audit path defaults to `./logs/financials-audit.jsonl`. The embedding default is `Qwen/Qwen3-Embedding-0.6B`. Model identifiers should match the profile validated in Task 1.
 
 This command prints selected settings, not credentials. Avoid publishing a full environment dump, `docker inspect`, or expanded Compose configuration.
 
@@ -187,7 +187,7 @@ For a graphical check, open `http://localhost:5601` in the **host browser** and 
 
 ### What is different about SEC ingestion?
 
-The chunk-size tradeoffs are already covered in [Episode 2: What ingestion already did](news-agent.md#what-ingestion-already-did). The current Financial Expert command uses the same **2,048-character chunks**, **256-character overlap**, and **16-item embedding batches**. The financial-specific differences are:
+The chunk-size tradeoffs are already covered in [Task 2: What ingestion already did](news-agent.md#what-ingestion-already-did). The current Financial Expert command uses the same **2,048-character chunks**, **256-character overlap**, and **16-item embedding batches**. The financial-specific differences are:
 
 | Detail | Current Financial Expert behavior | Why it matters |
 |---|---|---|
@@ -237,7 +237,7 @@ PY
 
 **Expected:** up to three evidence items, labeled `F1`, `F2`, and `F3`, with a trace containing `symbol_filter`, `hit_count`, path/chunk locators, and scores. This direct probe does not call the planning or generation model, invoke Finnhub, or append an expert-request audit record.
 
-The first retrieval still loads the local embedding model and may download its files. Preloaded document vectors do not eliminate the need to embed a new question. Keep the same embedding model as the preloaded corpus; refer to [Episode 2's retrieval explanation](news-agent.md#how-vector-retrieval-works-here) for the shared vector concepts.
+The first retrieval still loads the local embedding model and may download its files. Preloaded document vectors do not eliminate the need to embed a new question. Keep the same embedding model as the preloaded corpus; refer to [Task 2's retrieval explanation](news-agent.md#how-vector-retrieval-works-here) for the shared vector concepts.
 
 ### Why an exact symbol filter matters
 
@@ -251,7 +251,7 @@ The selected symbol changes with the question. The filter is inside the vector-s
 
 The filter still depends on correct ingestion labels. It does not independently authenticate the original document. It also does not select a fiscal period: this implementation has no automatic latest-filing sort or reporting-period filter. A request for the "latest" financial result can only be answered within the evidence actually returned.
 
-Financial retrieval uses `RAG_TOP_K=3` and `RAG_NUM_CANDIDATES=3`. Its query builder differs from the one discussed in Episode 2: a larger candidate value adds a `rescore.oversample_factor`; it is not sent as the same query-level `ef_search` parameter. No per-document diversity cap or minimum similarity-score gate is implemented here. A nearest neighbor can still be insufficient evidence.
+Financial retrieval uses `RAG_TOP_K=3` and `RAG_NUM_CANDIDATES=3`. Its query builder differs from the one discussed in Task 2: a larger candidate value adds a `rescore.oversample_factor`; it is not sent as the same query-level `ef_search` parameter. No per-document diversity cap or minimum similarity-score gate is implemented here. A nearest neighbor can still be insufficient evidence.
 
 **Troubleshooting:** a dimension error requires checking the query embedding configuration against the stored mapping, not deleting the index. Zero hits require checking the exact symbol and corpus coverage. Irrelevant hits require reading the source text and narrowing the question, not assuming the score establishes correctness.
 
@@ -268,7 +268,7 @@ Finnhub provides the implemented path for data points beyond that snapshot. For 
 
 This is an **on-demand quote request**, not a continuous price feed. MCP's Streamable HTTP transport describes how the tool is called; it does not mean this application subscribes to a market-data stream. "Current" means the latest quote returned by the provider, with its recorded timestamp, not a guarantee that the observation was made this second.
 
-The MCP boundary is the same concept introduced in [Episode 2](news-agent.md#step-4-start-and-test-tavily-through-mcp). Here the server exposes six financial tools, and the planner's allowlist constrains which names enter the normal execution plan:
+The MCP boundary is the same concept introduced in [Task 2](news-agent.md#step-4-start-and-test-tavily-through-mcp). Here the server exposes six financial tools, and the planner's allowlist constrains which names enter the normal execution plan:
 
 | Tool | Purpose |
 |---|---|
@@ -537,7 +537,7 @@ That final case is a boundary to understand, not a successful financial answer. 
 
 ### Where the advisory verifier fits
 
-The model reviewer can flag unsupported claims, contradictions, and other evidence problems. In the current code, its verdict is **advisory**: a rejection, malformed verdict, or unavailable reviewer does not independently veto a deterministic pass. The shared advisory behavior was introduced in Episode 2; inspect `model_checked` and `model_approved` separately from `approved` when reviewing this expert's audit.
+The model reviewer can flag unsupported claims, contradictions, and other evidence problems. In the current code, its verdict is **advisory**: a rejection, malformed verdict, or unavailable reviewer does not independently veto a deterministic pass. The shared advisory behavior was introduced in Task 2; inspect `model_checked` and `model_approved` separately from `approved` when reviewing this expert's audit.
 
 A failed deterministic check triggers one correction using the same evidence and recorded reasons. A second failure produces `withheld_by_verifier`. There is no open-ended retry loop and no guarantee that rewriting repairs missing evidence.
 
@@ -549,7 +549,7 @@ Other limits follow from the implementation: `## Evidence limits` is requested i
 
 ## Completion checkpoint
 
-You have completed this episode! Leave the shared services running in Terminals A (Finnhub MCP) and B (Financials Expert) when continuing the workshop.
+You have completed this task! Leave the shared services running in Terminals A (Finnhub MCP) and B (Financials Expert) when continuing the workshop.
 
 The financial-specific lessons are:
 
@@ -560,7 +560,7 @@ The financial-specific lessons are:
 
 These are responsibilities of the application around the model, not features gained by assigning the model a financial persona.
 
-Continue to [Episode 4: Orchestrator Expert](orcheestrator-agent.md), or return to the [workshop episode index](../README.md).
+Continue to [Task 4: Orchestrator Expert](orcheestrator-agent.md), or return to the [workshop task index](../README.md).
 
 [Troubleshooting reference](../troubleshooting/financials-agent.md)
 

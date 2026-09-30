@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 #!/usr/bin/env python3
-"""Validate Episode 1 without starting agents or changing application source.
+"""Validate Task 1 without starting agents or changing application source.
 
 Default: check Python/packages, source configuration, all three containers,
 OpenSearch k-NN read/write, and small paid model completions. Capture the actual
@@ -398,7 +398,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def finish_validation(validator: Validator, json_report: Path | None,
-                      summary: str, *, scope: str = "episode-1") -> int:
+                      summary: str, *, scope: str = "task-1") -> int:
     """Print a summary and optionally write the same redacted report contract."""
     code = validator.exit_code()
     print("\n" + summary)
@@ -449,11 +449,11 @@ def main() -> int:
             except Exception as exc:
                 validator.record(component + " source inspection", "FAIL", exc)
         summary = (
-            "INCOMPLETE — source inspection passed; infrastructure and inference were not tested"
-            if validator.exit_code() == 2 else "NOT READY — resolve source inspection failures"
+            "INCOMPLETE - source inspection passed; infrastructure and inference were not tested"
+            if validator.exit_code() == 2 else "NOT READY - resolve source inspection failures"
         )
         return finish_validation(validator, args.json_report, summary, scope="model-request-inspection")
-    validator.record("Scope", "INFO", "Episode 1 readiness only; no specialist, MCP, or Orchestrator service is expected yet.")
+    validator.record("Scope", "INFO", "Task 1 readiness only; no specialist, MCP, or Orchestrator service is expected yet.")
     if sys.version_info[:2] == (3, 12):
         validator.record("Python", "PASS", f"{platform.python_version()} on {platform.system()}/{platform.machine()}")
     else:
@@ -464,7 +464,7 @@ def main() -> int:
     missing = [part for part in COMPONENTS if not (repo / part / "Makefile").is_file()]
     validator.record("Repository", "FAIL" if missing else "PASS", "Missing components: " + ", ".join(missing) if missing else f"All three component Makefiles exist at {repo}.")
     if not env_true("USE_EXTERNAL_AI"):
-        validator.record("External inference", "FAIL", "Set USE_EXTERNAL_AI=true. This episode does not start local LLM servers.")
+        validator.record("External inference", "FAIL", "Set USE_EXTERNAL_AI=true. This task does not start local LLM servers.")
     else:
         validator.record("External inference", "PASS", "OpenAI mode." if env_true("USE_EXTERNAL_OPENAI") else "Third-party OpenAI-compatible mode.")
 
@@ -562,10 +562,10 @@ def main() -> int:
     if args.check_embeddings and not missing:
         validator.run("Local embedding inference", lambda: check_embeddings(repo, args.embedding_timeout))
     else:
-        validator.record("Embedding model download", "SKIP", "Optional. Add --check-embeddings to cache weights and test local inference before Episode 2.")
-    validator.record("Later-episode services", "SKIP", "News, Financials, Orchestrator, Tavily MCP, Finnhub MCP, and real corpus ingestion are deliberately not tested in Episode 1.")
+        validator.record("Embedding model download", "SKIP", "Optional. Add --check-embeddings to cache weights and test local inference before Task 2.")
+    validator.record("Later-task services", "SKIP", "News, Financials, Orchestrator, Tavily MCP, Finnhub MCP, and real corpus ingestion are deliberately not tested in Task 1.")
     code = validator.exit_code()
-    summary = "READY FOR EPISODE 2" if code == 0 else "INCOMPLETE — run the model checks before continuing" if code == 2 else "NOT READY — resolve failed checks and rerun"
+    summary = "READY FOR TASK 2" if code == 0 else "INCOMPLETE - run the model checks before continuing" if code == 2 else "NOT READY - resolve failed checks and rerun"
     return finish_validation(validator, args.json_report, summary)
 
 

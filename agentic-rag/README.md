@@ -27,11 +27,11 @@ If you are interested in reading more about this, check out these research paper
 |---|---|---|---|---|
 | **Agentic AI** | [Getting Started](#getting-started) | _Coming soon:_<br>Codex<br>Claude<br>Cursor | _Coming soon_ | [Videos](#videos) |
 
-## Episodes
+## Tasks
 
-These episodes are cumulative and build on top of one another leading up to the final episode of the client exercising our Agentic research agent.
+These tasks are cumulative and build on top of one another leading up to the final task of the client exercising our Agentic research agent.
 
-| Episode | Description | Hands-on Lab |
+| Task | Description | Hands-on Lab |
 | --- | --- | --- |
 | **1. Introduction to our Agentic Researcher** | Review the architecture, prepare the Python environment, start OpenSearch, and validate the shared services required by the lab. | [Start](tasks/introduction.md) |
 | **2. News Expert** | Build a governed specialist that combines historical OpenSearch RAG with current technology news retrieved through Tavily MCP. | [Start](tasks/news-agent.md) |
@@ -41,11 +41,11 @@ These episodes are cumulative and build on top of one another leading up to the 
 
 ## Getting Started
 
-The lab assembles the solution one boundary at a time. You will first prepare the development environment and OpenSearch, then run each specialist independently before connecting them to the Orchestrator. Every episode will explain what is being started, why it exists, what data crosses its interfaces, what output to expect, and how to diagnose failures before proceeding.
+The lab assembles the solution one boundary at a time. You will first prepare the development environment and OpenSearch, then run each specialist independently before connecting them to the Orchestrator. Every task will explain what is being started, why it exists, what data crosses its interfaces, what output to expect, and how to diagnose failures before proceeding.
 
-Plan to keep several terminal sessions open as the architecture grows. The complete experience requires a compatible Python environment, OpenSearch, a small historical-news dataset, converted SEC filing samples, Tavily and Finnhub credentials, and either local model weights or compatible OpenAI-style model endpoints. Beginning with the foundation episode keeps those dependencies visible and verifiable before the agent workflows are introduced.
+Plan to keep several terminal sessions open as the architecture grows. The complete experience requires a compatible Python environment, OpenSearch, a small historical-news dataset, converted SEC filing samples, Tavily and Finnhub credentials, and either local model weights or compatible OpenAI-style model endpoints. Beginning with the introduction/setup task keeps those dependencies visible and verifiable before the agent workflows are introduced.
 
-[Start Episode 1: Introduction to our Agentic Technology-company Researcher](tasks/introduction.md)
+[Start Task 1: Introduction to our Agentic Technology-company Researcher](tasks/introduction.md)
 
 ## Learn with Codex, Claude Code, or Cursor
 

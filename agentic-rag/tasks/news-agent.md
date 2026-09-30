@@ -1,10 +1,10 @@
-# Episode 2: News Expert
+# Task 2: News Expert
 
 A useful research answer needs more than relevant text. It needs the right subject authority, evidence from the right time period, and a record of how that evidence became an answer. A model can have accurate facts and still produce an inappropriate conclusion when those boundaries are missing.
 
-In this episode, you run the **News Expert**, an independently governed technology-news agent. It combines a historical news corpus in OpenSearch with real-time information retrieved through [Tavily](https://www.tavily.com/) over the internet; Tavily is a real-time API for AI to query in human language to obtain answers. You will inspect each retrieval path, start the expert, ask questions, and trace an answer through its citations and audit record.
+In this task, you run the **News Expert**, an independently governed technology-news agent. It combines a historical news corpus in OpenSearch with real-time information retrieved through [Tavily](https://www.tavily.com/) over the internet; Tavily is a real-time API for AI to query in human language to obtain answers. You will inspect each retrieval path, start the expert, ask questions, and trace an answer through its citations and audit record.
 
-This is one expert in the labs's **application-level Mixture of Experts (MoE)** architecture. Here, an expert is an application with a defined responsibility, bounded tools, evidence requirements, and its own validation workflow. This episode runs the News Expert independently.
+This is one expert in the labs's **application-level Mixture of Experts (MoE)** architecture. Here, an expert is an application with a defined responsibility, bounded tools, evidence requirements, and its own validation workflow. This task runs the News Expert independently.
 
 ## What you will learn
 
@@ -49,7 +49,7 @@ The News Expert contains two model roles. The `ORCH` configuration names refer t
 
 In the [conference recording demonstration](https://bit.ly/4iqaYhh), we used Nemotron for the first model role and Qwen for generation. Separating those jobs lets you change or evaluate a planner without changing the generator, and change writing behavior without changing the application's authority rules.
 
-In this lab, we default to OpenAI and configure both roles with `gpt-5.4`. Its optional external-provider profile assigns different models. This episode uses the configuration you already validated. It does not start local text-generation servers. Distinct models can also share failure modes; adding a second model is not, by itself, a correctness guarantee, but it can help based on the model.
+In this lab, we default to OpenAI and configure both roles with `gpt-5.4`. Its optional external-provider profile assigns different models. This task uses the configuration you already validated. It does not start local text-generation servers. Distinct models can also share failure modes; adding a second model is not, by itself, a correctness guarantee, but it can help based on the model.
 
 [Implementation: model configuration](../scripts/news-agent/src/common/config.py)
 [Model calls](../scripts/news-agent/src/news_agent/llm.py)
@@ -57,11 +57,11 @@ In this lab, we default to OpenAI and configure both roles with `gpt-5.4`. Its o
 
 ## Before you begin
 
-Complete Episode 1 and its model validation first. You need the existing `lab`, `opensearch`, and `dashboards` services, working external inference credentials, and a [Tavily API key](https://www.tavily.com/). Real-time search probes and normal expert requests use external services and may incur charges. Direct historical retrieval uses the local embedding model and OpenSearch.
+Complete Task 1 and its model validation first. You need the existing `lab`, `opensearch`, and `dashboards` services, working external inference credentials, and a [Tavily API key](https://www.tavily.com/). Real-time search probes and normal expert requests use external services and may incur charges. Direct historical retrieval uses the local embedding model and OpenSearch.
 
 ## Step 1: enter the existing workspace
 
-It's expected that the 3 containers from the Episode 1 are still running. If they aren't, please revisit that Episode to start them.
+It's expected that the 3 containers from the Task 1 are still running. If they aren't, please revisit that Task to start them.
 
 Open three host terminal windows. In each, enter the same development container by running the following command:
 
@@ -76,7 +76,7 @@ cd /workspace/agentic-rag/2-news-agent
 pwd
 ```
 
-Use these terminal names throughout the episode:
+Use these terminal names throughout the task:
 
 | Terminal | Purpose |
 |---|---|
@@ -86,7 +86,7 @@ Use these terminal names throughout the episode:
 
 These are three shells in one container, not three additional containers. An export in one shell does not update the others or an already-running process.
 
-### Network addresses for this episode
+### Network addresses for this task
 
 | Component | Address used inside `lab` | Access from the host |
 |---|---|---|
@@ -126,7 +126,7 @@ for label, value in (
 PY
 ```
 
-**Expected:** OpenSearch points to `opensearch-single:9200`; the index is `techcomp-vector-chunks`; the models match Episode 1's selected profile; all three check categories and model review are enabled; correction attempts are `1`; raw-query auditing is `False`. The default embedding model is `Qwen/Qwen3-Embedding-0.6B`.
+**Expected:** OpenSearch points to `opensearch-single:9200`; the index is `techcomp-vector-chunks`; the models match Task 1's selected profile; all three check categories and model review are enabled; correction attempts are `1`; raw-query auditing is `False`. The default embedding model is `Qwen/Qwen3-Embedding-0.6B`.
 
 This command prints selected settings, not credentials. Avoid publishing a full environment dump, `docker inspect`, or expanded Compose configuration.
 
@@ -223,7 +223,7 @@ The current command-line defaults are **2,048 characters per chunk**, **256 char
 
 A batch is a processing group, not a larger evidence chunk. The metadata-enriched embedding input helps associate a passage with its article, while the stored `text` remains the original chunk used as evidence. No text-generation model is used to rewrite those chunks during ingestion.
 
-Read [Chunking Strategies for the News Expert](../concepts/CHUNKING_STRATEGIES.md) for the exact splitter behavior, alternative implementations, and a non-destructive experiment workflow. That guide is optional; no re-ingestion is required to complete this episode.
+Read [Chunking Strategies for the News Expert](../concepts/CHUNKING_STRATEGIES.md) for the exact splitter behavior, alternative implementations, and a non-destructive experiment workflow. That guide is optional; no re-ingestion is required to complete this task.
 
 [Implementation: CSV parsing, chunking, identities, and embedding input](../scripts/news-agent/src/ingest.py)
 
@@ -423,7 +423,7 @@ The application assigns `H1`, `H2`, and so on to historical items and `W1`, `W2`
 
 ## Completion checkpoint
 
-You have completed this episode! Leave the shared services running in Terminals A (Tavily MCP) and B (News Expert) when continuing the workshop.
+You have completed this task! Leave the shared services running in Terminals A (Tavily MCP) and B (News Expert) when continuing the workshop.
 
 Keep these lessons with the implementation:
 
@@ -434,7 +434,7 @@ Keep these lessons with the implementation:
 
 For additional retrieval experiments, continue with [Chunking Strategies for the News Expert](../concepts/CHUNKING_STRATEGIES.md).
 
-Continue to [Episode 3: Financials Expert](financials-agent.md), or return to the [workshop episode index](../README.md#episodes).
+Continue to [Task 3: Financials Expert](financials-agent.md), or return to the [workshop task index](../README.md#tasks).
 
 [Troubleshooting reference](../troubleshooting/news-agent.md)
 

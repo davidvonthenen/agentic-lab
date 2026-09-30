@@ -1,10 +1,10 @@
-# Episode 5: Run the Client End-to-End
+# Task 5: Run the Client End-to-End
 
 A useful research answer needs more than fluent writing. We need to understand which information supports it, which checks ran, and what the system could not establish. The client is where those decisions become visible to the person asking the question.
 
-In this final episode, you use the command-line client to ask one technology-company research question. You then follow the response through its citations, execution metadata, and audit records. The goal is to connect the answer you see with the evidence and policy decisions behind it.
+In this final task, you use the command-line client to ask one technology-company research question. You then follow the response through its citations, execution metadata, and audit records. The goal is to connect the answer you see with the evidence and policy decisions behind it.
 
-The previous episodes assembled the lab's **Mixture of Experts (MoE)** solution. Here, MoE refers to separately governed agent applications that cooperate on a request. This episode does not rebuild or explain their internal workflows. It focuses on the client experience and the **chain of custody** for one completed request: what was requested, what evidence was used, which checks applied, and what was returned.
+The previous tasks assembled the lab's **Mixture of Experts (MoE)** solution. Here, MoE refers to separately governed agent applications that cooperate on a request. This task does not rebuild or explain their internal workflows. It focuses on the client experience and the **chain of custody** for one completed request: what was requested, what evidence was used, which checks applied, and what was returned.
 
 > **IMPORTANT:** This is a demonstration of inspectable AI governance. It is not an investment-advice application, an authenticated multi-user service, or a production compliance system. Connecting a news article with a stock quote does not establish that the article's subject caused the price.
 
@@ -21,7 +21,7 @@ The previous episodes assembled the lab's **Mixture of Experts (MoE)** solution.
 
 ## Before you begin
 
-Complete Episode 1's environment and model validation. Leave the services established in [Episode 2](news-agent.md), [Episode 3](financials-agent.md), and [Episode 4](orcheestrator-agent.md) running.
+Complete Task 1's environment and model validation. Leave the services established in [Task 2](news-agent.md), [Task 3](financials-agent.md), and [Task 4](orcheestrator-agent.md) running.
 
 The existing Compose environment must contain the `lab`, `opensearch`, and `dashboards` services.
 
@@ -97,7 +97,7 @@ At the **`You:` prompt**, paste the following as one input and press Enter:
 Can you tell me what NVIDIA is doing in the Artificial Intelligence space in news articles? How that work has affected their current stock price (ticker symbol: NVDA)?
 ```
 
-This is the only research question for this episode. Do not paste it into the Bash inspection shell. After receiving the response, leave the client open and use the other terminal for the remaining exercises.
+This is the only research question for this task. Do not paste it into the Bash inspection shell. After receiving the response, leave the client open and use the other terminal for the remaining exercises.
 
 The question brings together a company's AI activity, its current market information, and a request to explain their relationship. The explicitly supplied company name and ticker identify one intended subject. The words **has affected** also create an important evidence test: the answer must not assume a causal relationship merely because the user asked for one.
 
@@ -156,7 +156,7 @@ A withholding or audit-failure notice can replace the normal response and omit t
 
 ## Step 4: distinguish observability from successful execution
 
-Keep the **Client terminal** open. Look at the existing service terminals from the previous episodes; do not launch additional services or run direct expert queries.
+Keep the **Client terminal** open. Look at the existing service terminals from the previous tasks; do not launch additional services or run direct expert queries.
 
 | Observation | What it tells you | What it does not establish |
 |---|---|---|
@@ -170,7 +170,7 @@ The outer HTTP response reports zero token-usage values as placeholders. Those a
 
 Use audit timing fields to investigate where time was spent. Parallel work overlaps, and the client, model calls, retrieval, and audit records measure different boundaries. Adding every recorded duration does not necessarily reproduce the client's elapsed time.
 
-The **Orchestrator reinforcement loop** discussed in this lab is runtime feedback within a bounded workflow. In this episode, its observable evidence is recorded model attempts, completion decisions, verification results, and correction or fallback outcomes. It is not a training run, and the client does not update model weights. A successful request need not use a correction attempt.
+The **Orchestrator reinforcement loop** discussed in this lab is runtime feedback within a bounded workflow. In this task, its observable evidence is recorded model attempts, completion decisions, verification results, and correction or fallback outcomes. It is not a training run, and the client does not update model weights. A successful request need not use a correction attempt.
 
 The observation surfaces used here are terminal output and local JSONL audit files. The supplied Compose configuration does not ship these audit files into OpenSearch Dashboards or configure a distributed-tracing backend. Dashboards is not automatically a viewer for the request's audit history.
 
@@ -408,7 +408,7 @@ While the client is waiting at `You:`, press **Ctrl+C** to close it without send
 
 The central lesson is that **an inspectable answer preserves its chain of custody**. The client displays the result. Citations identify the evidence references. Audit records explain the recorded work and checks. None of those alone guarantees correctness, but together they let you investigate the result rather than trust its fluency.
 
-Return to the [workshop episode index](../README.md).
+Return to the [workshop task index](../README.md).
 
 [Troubleshooting reference](../troubleshooting/client.md)
 

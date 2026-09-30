@@ -1,4 +1,4 @@
-[Episode 4: Orchestrator Expert](../tasks/orcheestrator-agent.md)
+[Task 4: Orchestrator Expert](../tasks/orcheestrator-agent.md)
 
 ## Troubleshooting reference
 
@@ -6,10 +6,10 @@
 |---|---|
 | Compose rejects a duplicate environment key | Retain one declaration each of `USE_EXTERNAL_ORCH_AI` and `USE_EXTERNAL_LLM_AI` in `lab.environment`, preserving their values. See Step 1. |
 | `src.host_agent` cannot be imported | Re-enter the Orchestrator package containing `Makefile` and `src/host_agent`. Check the numbered workshop directory versus the archive's `orchestrator_agent` directory. |
-| Printed model settings differ between terminals | Compare their selected settings and inherited exports. Restore the Episode 1 profile, then restart the affected service. |
-| Agent Card cannot be reached | Confirm the existing expert process is running and the configured base URL is reachable inside `lab`. Return to its earlier episode for dependency diagnosis. |
+| Printed model settings differ between terminals | Compare their selected settings and inherited exports. Restore the Task 1 profile, then restart the affected service. |
+| Agent Card cannot be reached | Confirm the existing expert process is running and the configured base URL is reachable inside `lab`. Return to its earlier task for dependency diagnosis. |
 | Discovery succeeds but a later task fails | A card describes an interface, not downstream readiness. Inspect the expert status/warnings and its existing process logs. |
-| Host cannot reach port `10000` | The supplied Compose file does not publish that port. Run this episode's probe inside `lab`. |
+| Host cannot reach port `10000` | The supplied Compose file does not publish that port. Run this task's probe inside `lab`. |
 | `/health` or `/v1/models` returns `404` | Those routes do not exist in this Orchestrator. Use the POST input-contract probe in Step 6. |
 | Expected validation probe returns `400` | This is success for the deliberately empty user message. Check `error.code` is `missing_user_message`. |
 | Planner/completion fallback warning appears | Inspect the relevant model trace and service log for a schema, policy, parameter, authorization, or timeout failure. A deterministic fallback is not proof the model call succeeded. |
