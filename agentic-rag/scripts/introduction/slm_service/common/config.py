@@ -9,29 +9,40 @@ import os
 import platform
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 
 def _get_str(name: str, default: str = "") -> str:
     value = os.getenv(name)
-    if value is None:
+    if value is None or value.strip() == "":
         return default
     return value.strip()
 
 
 def _get_int(name: str, default: int) -> int:
+    """Read an integer environment variable, falling back on invalid input."""
     value = os.getenv(name)
     if value is None or value.strip() == "":
-        return int(default)
-    return int(value)
+        return default
+    try:
+        return int(value)
+    except ValueError:
+        return default
 
 
 def _get_float(name: str, default: float) -> float:
+    """Read a float environment variable, falling back on invalid input."""
     value = os.getenv(name)
     if value is None or value.strip() == "":
-        return float(default)
-    return float(value)
+        return default
+    try:
+        return float(value)
+    except ValueError:
+        return default
 
 
 def _get_bool(name: str, default: bool = False) -> bool:
+    """Read a boolean environment variable using common truthy strings."""
     value = os.getenv(name)
     if value is None or value.strip() == "":
         return bool(default)
@@ -39,11 +50,10 @@ def _get_bool(name: str, default: bool = False) -> bool:
 
 
 def _default_llama_n_gpu_layers() -> int:
-    """Return a reasonable GPU offload default for the local LLM runtime."""
-
+    """Use full Metal offload by default on Apple Silicon."""
     if platform.system() == "Darwin" and platform.machine() == "arm64":
         return -1
-    return 20
+    return Settings.llama_n_gpu_layers
 
 
 def _is_apple_silicon() -> bool:
@@ -52,14 +62,17 @@ def _is_apple_silicon() -> bool:
     return platform.system() == "Darwin" and platform.machine() == "arm64"
 
 
+
 @dataclass
 class Settings:
     """Connection and model settings for recipe graph/vector ingestion."""
-    # Local LLM runtime
+    # Local LLM runtime used by slm_service.py
     llm_runtime: str = "gguf"  # supported: gguf, mlx
 
     # Llama.cpp
     llama_model_path: str = "Qwen2.5-7B-Instruct-1M-Q5_K_M.gguf"
+    # Context window requested from llama.cpp. The Qwen model may support larger
+    # contexts, but this project defaults to 65,536 tokens to keep memory use sane.
     llama_ctx: int = 65536                  # Qwen = 65536/101000
     llama_n_threads: int = max(1, (os.cpu_count() or 4) - 1)
     llama_n_gpu_layers: int = 20             # -1 offloads all layers when GPU backend is available
@@ -68,7 +81,7 @@ class Settings:
     llama_low_vram: bool = True              # reduce Metal VRAM usage
 
     # MLX local model directory. Relative paths are resolved under ~/models.
-    mlx_model_path: str = "Qwen2.5-7B-Instruct-1M-4bit" # OLD: "Qwen2.5-7B-Instruct-4bit"
+    mlx_model_path: str = "Qwen2.5-7B-Instruct-1M-4bit"
 
     # External LLM (OpenAI-compatible endpoint). Used when USE_EXTERNAL_AI=true.
     llm_server_url: str = "http://127.0.0.1:8001/v1"
@@ -85,10 +98,12 @@ class Settings:
 def load_settings() -> Settings:
     """Load settings from environment variables."""
 
-    external_ai = os.getenv("USE_EXTERNAL_AI", "false").lower() in ("1", "true", "yes", "on")
+    external_ai = os.getenv("USE_EXTERNAL_AI", "false").lower() in ("1", "true", "yes", "y", "on")
 
     llm_runtime = _get_str("LLM_RUNTIME", "").strip().lower()
     if not llm_runtime:
+        # Preserve the workshop's Apple Silicon default while still allowing
+        # LLM_RUNTIME to explicitly select either supported backend.
         llm_runtime = "mlx" if _is_apple_silicon() else Settings.llm_runtime
     elif llm_runtime not in {"gguf", "mlx"}:
         raise ValueError("LLM_RUNTIME must be 'gguf' or 'mlx'.")

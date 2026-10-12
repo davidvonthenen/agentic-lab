@@ -50,6 +50,7 @@ def _load_local_llm() -> Any:
 
     if settings.llm_runtime == "mlx":
         return _load_local_mlx_llm(settings)
+
     return _load_local_gguf_llm(settings)
 
 
@@ -314,6 +315,9 @@ def create_app() -> Flask:
         top_p = float(payload.get("top_p", 0.9))
         model = str(payload.get("model") or settings.llm_server_model)
 
+        # print request/question
+        # print("Request payload:", payload)
+
         if settings.llm_runtime == "mlx":
             content, usage = _run_mlx_chat_completion(
                 settings,
@@ -331,6 +335,7 @@ def create_app() -> Flask:
                 max_completion_tokens=max_completion_tokens,
             )
 
+        print("Response content:", content)
         return jsonify(_build_chat_response(model=model, content=content, usage=usage)), 200
 
     return app
