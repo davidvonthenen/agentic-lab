@@ -15,7 +15,7 @@ You will inspect the preloaded filings, test both data paths independently, ask 
 | Step | Activity | Checkpoint |
 |---|---|---|
 | 1 | Enter the development container and inspect configuration. | The Financial Expert's source, models, and service addresses are identified. |
-| 2 | Inspect the preloaded SEC corpus. | Available symbols, filing metadata, and date coverage are visible. |
+| 2 | Inspect the pre-populated hosted SEC corpus. | Available symbols, filing metadata, and date coverage are visible. |
 | 3 | Retrieve filing passages directly. | Every returned passage belongs to the selected symbol. |
 | 4 | Start and test Finnhub through MCP. | The quote tool returns structured fields and timestamps, or a diagnosable error. |
 | 5 | Start the Financial Expert. | Its health endpoint and Agent Card respond. |
@@ -45,7 +45,7 @@ The `ORCH` settings name the **planning and advisory-verification model inside t
 
 ## Before you begin
 
-Complete Task 1's environment and model validation. The existing Compose environment must contain the `lab`, `opensearch`, and `dashboards` services. You also need a [Finnhub API key](https://finnhub.io/) for the market-data exercises. The development container already contains the Python environment and dependencies.
+Complete Task 1's environment and model validation. The existing `lab` development container must be running and able to access the pre-populated SEC corpus on OpenSearch hosted by Instaclustr. No local OpenSearch or Dashboards service is required. You also need a [Finnhub API key](https://finnhub.io/) for the market-data exercises. The development container already contains the Python environment and dependencies.
 
 Finnhub receives the company/symbol and other arguments for the selected tools, rather than the entire financial question.
 
@@ -80,12 +80,11 @@ These are three shells in one development container. An environment export in on
 
 | Component | Address inside `lab` | Access from the host |
 |---|---|---|
-| OpenSearch | `http://opensearch-single:9200` | `http://localhost:9200` |
-| OpenSearch Dashboards | `http://opensearch-single-dashboards:5601` | `http://localhost:5601` |
+| OpenSearch hosted by Instaclustr | The hosted endpoint configured for the Financial Expert. | Remote service; no local OpenSearch port is published. |
 | Finnhub MCP | `http://127.0.0.1:8766/mcp` | Not published by the supplied Compose file. |
 | Financial Expert | `http://127.0.0.1:9002` | Not published by the supplied Compose file. |
 
-Keep all expert and MCP probes inside `lab`. OpenSearch is in a different container, so `localhost:9200` is not its address from these shells.
+Keep all expert and MCP probes inside `lab`. OpenSearch is hosted outside this container; use the Financial Expert's configured client rather than a local database URL.
 
 **Terminal C:**
 
@@ -114,13 +113,15 @@ for label, value in (
 PY
 ```
 
-**Expected:** OpenSearch is `opensearch-single:9200`; the index is `financial-filings-vector-chunks`; `top_k` and candidates are both `3`; all three check categories are `True`; the audit path defaults to `./logs/financials-audit.jsonl`. The embedding default is `Qwen/Qwen3-Embedding-0.6B`. Model identifiers should match the profile validated in Task 1.
+**Expected:** OpenSearch points to the configured Instaclustr-hosted instance; the displayed filing index is the pre-populated corpus used by this workspace (the source default is `agenticrag-finfile-vector-chunks`); `top_k` and candidates are both `3`; all three check categories are `True`; the audit path defaults to `./logs/financials-audit.jsonl`. The embedding default is `Qwen/Qwen3-Embedding-0.6B`. Model identifiers should match the profile validated in Task 1.
 
 This command prints selected settings, not credentials. Avoid publishing a full environment dump, `docker inspect`, or expanded Compose configuration.
 
 ## Step 2: inspect the preloaded SEC corpus
 
-Before asking about a company's financials, check whether the corpus contains that issuer and the relevant reporting period. A populated index is not proof that every company or quarter is represented.
+> **Use the pre-populated hosted data.** The workshop's SEC-filing corpus and document vectors are already populated on an OpenSearch instance hosted by Instaclustr. Do **not** run `make ingest`, delete the index, or recreate it during this walkthrough. Ingestion remains required for the separate [native setup](../references/NATIVE_SETUP.md#native-only-ingestion-for-tasks-2-and-3). The ingestion explanation below describes how the evidence is prepared without asking you to repeat that work.
+
+Before asking about a company's financials, check whether the corpus contains that issuer and the relevant reporting period. A populated index is not proof that every company or quarter is represented. The read-only probe uses [`load_settings()`](../scripts/financials-agent/src/common/config.py) and [`create_client()`](../scripts/financials-agent/src/common/opensearch_client.py) to inspect the same hosted index used by the Financial Expert.
 
 **Terminal C:**
 
@@ -181,9 +182,9 @@ PY
 
 **Expected:** a positive chunk count, a `keyword` mapping for `symbol`, and a `knn_vector` embedding field using Lucene HNSW and cosine similarity. Inspect the actual dimension rather than assuming one. The aggregation shows available symbols and their dated coverage. Bucket counts count **chunks**, not distinct filings.
 
-The latest `filing_date` present is not proof of complete coverage through that date, and `fiscal_period` describes a reporting period rather than when the document was filed. Some records may omit either field. Do not convert a date in a filename into a verified filing date or a hard corpus cutoff. The supplied source archive does not include the actual filing dataset or an image-build manifest establishing that cutoff.
+The latest `filing_date` present is not proof of complete coverage through that date, and `fiscal_period` describes a reporting period rather than when the document was filed. Some records may omit either field. Do not convert a date in a filename into a verified filing date or a hard corpus cutoff. The supplied source archive does not include the actual filing dataset or a corpus manifest establishing the hosted data's collection cutoff.
 
-For a graphical check, open `http://localhost:5601` in the **host browser** and use **Dev Tools** to inspect `financial-filings-vector-chunks`. It is the same index, not another evidence source.
+This probe inspects the hosted filing index directly; no local Dashboards instance is needed.
 
 ### What is different about SEC ingestion?
 
@@ -202,7 +203,7 @@ The chunk-size tradeoffs are already covered in [Task 2: What ingestion already 
 
 ## Step 3: retrieve filing evidence without generating an answer
 
-Let's call the repository's filing retriever directly:
+Let's call the repository's filing retriever directly. Complete Step 2 first: initialization calls [`ensure_index()`](../scripts/financials-agent/src/common/opensearch_client.py), which can create an absent index. Do not use retrieval startup to provision or repair the hosted workshop corpus; resolve failed corpus checks with the workshop maintainer before continuing:
 
 ```bash
 python - <<'PY'

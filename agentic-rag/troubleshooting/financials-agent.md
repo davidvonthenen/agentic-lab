@@ -5,8 +5,9 @@
 | Symptom | Check and next action |
 |---|---|
 | Financial module cannot be found | Re-enter the expert directory in Step 1. Run Make targets from the directory containing its `Makefile`, not the repository root. |
-| `opensearch-single` does not resolve | Run the command inside `lab` on the existing Compose network. |
-| Filing index is missing or empty | Verify the preloaded image, configured index, and OpenSearch startup logs. Do not recreate or ingest over it. |
+| Hosted OpenSearch cannot resolve or connect | Run the probe inside `lab`, inspect the effective connection settings, and verify outbound connectivity and workshop access. Confirm the supplied workspace image/configuration with the maintainer if it still points to a local database. |
+| Filing index is missing or empty | Confirm the effective index and access to the pre-populated corpus on OpenSearch hosted by Instaclustr with the workshop maintainer, then repeat the task's read-only corpus inspection. Do not run `make ingest`, recreate the index, or overwrite the dataset as a repair step. |
+| OpenSearch returns HTTP 401/403 or a TLS error | Confirm hosted-service access and the supplied connection configuration with the maintainer. Keep credentials private; do not disable certificate verification to bypass the error. |
 | Wrong issuer, irrelevant passage, or missing period | Inspect stored `symbol`, path, text, and period metadata. The filter cannot repair incorrect ingestion labels or absent evidence. |
 | Embedding model load or vector-dimension error | Check cache access, memory, and embedding compatibility. Do not substitute a different embedding model or delete vectors. |
 | Finnhub MCP starts but quotes fail | Test the adapter, not only startup. Check the key in Terminal A, provider authorization/quota, and its error logs. |

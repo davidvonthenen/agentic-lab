@@ -1,5 +1,9 @@
 [Task 2: News Expert](../tasks/news-agent.md)
 
+## Corpus availability
+
+The default workshop uses the pre-populated news corpus and document embeddings on OpenSearch hosted by Instaclustr. The News Expert uses its configured connection and index; the source default is `agenticrag-technews-vector-chunks`. The task's read-only probes inspect the effective index rather than assuming a local database address. No local OpenSearch or Dashboards startup, corpus-file preparation, or `make ingest` is required for this path. The ingestion implementation remains available for learning and for the required [native-only ingestion](NATIVE_SETUP.md#native-only-ingestion-for-tasks-2-and-3).
+
 ## Source map
 
 These are the implementation files used by this task. When the overview and code differ, follow the current code and rerun the relevant local probe.

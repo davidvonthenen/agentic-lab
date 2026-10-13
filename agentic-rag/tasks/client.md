@@ -23,7 +23,7 @@ The previous tasks assembled the lab's **Mixture of Experts (MoE)** solution. He
 
 Complete Task 1's environment and model validation. Leave the services established in [Task 2](news-agent.md), [Task 3](financials-agent.md), and [Task 4](orchestrator-agent.md) running.
 
-The existing Compose environment must contain the `lab`, `opensearch`, and `dashboards` services.
+The existing `lab` development container must remain running. The specialists use the pre-populated corpora on OpenSearch hosted by Instaclustr; no local OpenSearch or Dashboards service is required.
 
 ## Step 1: enter the client workspace
 
@@ -172,7 +172,7 @@ Use audit timing fields to investigate where time was spent. Parallel work overl
 
 The **Orchestrator reinforcement loop** discussed in this lab is runtime feedback within a bounded workflow. In this task, its observable evidence is recorded model attempts, completion decisions, verification results, and correction or fallback outcomes. It is not a training run, and the client does not update model weights. A successful request need not use a correction attempt.
 
-The observation surfaces used here are terminal output and local JSONL audit files. The supplied Compose configuration does not ship these audit files into OpenSearch Dashboards or configure a distributed-tracing backend. Dashboards is not automatically a viewer for the request's audit history.
+The observation surfaces used here are terminal output and local JSONL audit files. The hosted OpenSearch instance supplies retrieval evidence; this lab does not ship its local audit files there or configure a distributed-tracing backend. Moving the corpora to a hosted service does not make the request's audit history remotely available or durable.
 
 [Implementation: HTTP response metadata](../scripts/orchestrator-agent/src/host_agent/__main__.py)
 

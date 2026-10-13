@@ -4,7 +4,7 @@ This workshop builds a technology-company research assistant with three responsi
 
 This is a **Mixture of Experts at the application level**: independently governed agents own different kinds of questions. The Orchestrator's **reinforcement loop** is a bounded feedback loop-plan, delegate, evaluate, and correct or stop.
 
-In this task, you prepare the environment that supports those experts. You will start OpenSearch, OpenSearch Dashboards, and a Python workspace container. You will also configure external inference and verify that the workspace can use it.
+In this task, you prepare the environment that supports those experts. You will start only the Python development/jump container. The news and SEC-filing corpora, including their document embeddings, are already populated on an OpenSearch instance hosted by Instaclustr. You will configure external inference and verify the workspace before running the experts. No local OpenSearch or Dashboards service is required.
 
 ![Technology-company research agent architecture](../images/introduction/demo-architecture-simplistic-final.png)
 
@@ -14,9 +14,8 @@ The diagram shows the complete solution. Its Nemotron Orchestrator and LLM Reaso
 
 | Component | Function in the lab | What crosses its boundary |
 |---|---|---|
-| Python workspace (`lab`) | Provides Python 3.12, the supplied dependencies, Git, Make, and a persistent checkout of the lab repository. Later, you will start each application process in a separate terminal inside this container. | Source files, local embeddings, API requests, retrieved evidence, and responses. |
-| OpenSearch | Stores and retrieves the news and SEC-filing chunks that you ingest in later tasks. | Document chunks, metadata, embedding vectors, and retrieval queries/results. |
-| OpenSearch Dashboards | Provides a browser interface for inspecting OpenSearch and running diagnostic queries. | OpenSearch API requests and inspection results. |
+| Python workspace (`lab`) | Provides Python 3.12, the supplied dependencies, Git, Make, and the lab code and configuration. Later, you will start each application process in a separate terminal inside this container. | Source files, locally computed query embeddings, API requests, retrieved evidence, and responses. |
+| OpenSearch hosted by Instaclustr | Stores the pre-populated news and SEC-filing chunks and their document embeddings. Later tasks inspect and retrieve this evidence without repeating ingestion. | Document chunks, metadata, stored embedding vectors, and retrieval queries/results. |
 | External model provider | Runs the planning/verification and answer-generation models. No local text-generation model server is started. | Prompts, selected evidence, and model responses over HTTPS. |
 
 Later, **MCP** connects each specialist to bounded tools and data. **A2A** connects the Orchestrator to those specialists. The Orchestrator only manages the coordination between the News Expert and Financials Expert and enforces the AI governance rules and policy within this solution. 
@@ -25,13 +24,13 @@ Later, **MCP** connects each specialist to bounded tools and data. **A2A** conne
 
 **Default: Podman and Compose.** Follow the instructions below on Linux, Windows, or macOS, including Apple Silicon. These are Linux containers; Podman uses a Linux virtual machine on Windows and macOS. See the [Podman machine documentation](https://docs.podman.io/en/latest/markdown/podman-machine-init.1.html).
 
-**Alternative: host Python environment.** Follow [Native Python Setup](../references/NATIVE_SETUP.md) to install the workspace dependencies on your machine instead of running the `lab` container. That guide reuses the two OpenSearch services and explains how to point at an existing OpenSearch installation.
+**Alternative: host Python environment.** Follow [Native Python Setup](../references/NATIVE_SETUP.md) to install the workspace dependencies on your machine instead of running the `lab` container. That guide retains the native OpenSearch and Dashboards setup and requires `make ingest` for each agent. Its local-database workflow is separate from the hosted-corpus path below.
 
 ### Before you begin
 
 Install [Podman Desktop](https://podman-desktop.io/docs/installation). Enable a Compose provider using the [Podman Desktop Compose setup](https://podman-desktop.io/docs/compose/setting-up-compose). `podman compose` delegates to an external provider such as Docker Compose or `podman-compose`; installing Podman alone does not always install that provider. [Reference](https://docs.podman.io/en/latest/markdown/podman-compose.1.html)
 
-You also need an [OpenAI API key](https://platform.openai.com/) (or an OpenAI-compatible service, such as [Nebius TokenFactory](https://tokenfactory.nebius.com/)), a [FinnHub API key](https://finnhub.io/), and a [Tavily API key](https://www.tavily.com/), for the optional configuration, with access to the chosen models and available API quota. Model validation sends small paid requests. Internet access is needed for the container images, repository clone, Python packages, model API calls, and the first embedding-model download. Tavily and Finnhub keys are **RERQUIRED** for the setup of your `.env` configuration file.
+You also need an [OpenAI API key](https://platform.openai.com/) (or an OpenAI-compatible service, such as [Nebius TokenFactory](https://tokenfactory.nebius.com/)), a [FinnHub API key](https://finnhub.io/), and a [Tavily API key](https://www.tavily.com/), for the optional configuration, with access to the chosen models and available API quota. Model validation sends small paid requests. Internet access is needed for the development image, the hosted OpenSearch instance, model API calls, and the first embedding-model download. Tavily and Finnhub keys are **RERQUIRED** for the setup of your `.env` configuration file.
 
 For planning purposes, reserve roughly **4 CPU cores, 8 GiB of memory, and 30 GiB of free disk space** for the container environment. These are suggested workshop allocations, not measured minimum requirements. A machine with 16 GiB of total RAM should be sufficient for the operating system and all processes within this lab.
 
@@ -62,26 +61,6 @@ podman machine start
 
 When a machine already exists, start that machine rather than initializing another. Review its memory allocation in Podman Desktop. If it is already running, continue. The commands above also work in PowerShell.
 
-### Set the OpenSearch kernel prerequisite
-
-OpenSearch requires the Linux kernel's `vm.max_map_count` to be at least `262144`. On Windows and macOS, configure the **Podman VM**, not the host operating system. [OpenSearch installation reference](https://docs.opensearch.org/latest/install-and-configure/install-opensearch/docker/)
-
-**Windows or macOS - host terminal:**
-
-```bash
-podman machine ssh "sudo sysctl -w vm.max_map_count=262144"
-podman machine ssh "sysctl vm.max_map_count"
-```
-
-**Linux with Podman running directly on the host:**
-
-```bash
-sudo sysctl -w vm.max_map_count=262144
-sysctl vm.max_map_count
-```
-
-**Expected:** `vm.max_map_count = 262144`, or a larger existing value. A temporary `sysctl -w` setting may need to be reapplied after restarting the VM or host. For a persistent Linux setting, an administrator can place `vm.max_map_count=262144` in a file under `/etc/sysctl.d/` and run `sudo sysctl --system` in the same Linux environment.
-
 ## Step 1: open the task directory
 
 Open the repository or extracted workshop distribution on your **host**. From its root, run:
@@ -90,9 +69,9 @@ Open the repository or extracted workshop distribution on your **host**. From it
 cd scripts/introduction
 ```
 
-Keep this host terminal in that directory for all `podman compose` commands. It contains the supplied `docker-compose.yaml`, Dockerfile, environment templates, and validation script. You do not need to write these files or install Python on the host for the default path.
+Keep this host terminal in that directory for all `podman compose` commands. It contains the supplied [Compose definition](../scripts/introduction/docker-compose.yaml) and environment templates; the development image supplies the Python workspace and its runtime tooling. You do not need to write a Dockerfile or install Python on the host for the default path.
 
-The runtime image clones the workshop repository configured by its publisher. On first startup it copies that checkout into a persistent workspace at `/workspace/agentic-rag`. This is a **separate checkout from the host directory**. Editing a host source file does not automatically change the container's copy.
+The supplied development image provides the workshop code and configuration in `/workspace/agentic-rag`. This is a **separate checkout from the host directory**. Editing a host source file does not automatically change the container's copy. The supplied Compose definition does not mount persistent workspace storage; preserve local changes and audit files before removing or replacing the container.
 
 ## Step 2: choose your external inference provider
 
@@ -204,38 +183,37 @@ For a third-party service, use `USE_EXTERNAL_AI=true` and set the URL, key, mode
 
 Compatibility is not identical behavior. Models differ in sampling parameters, token limits, structured output, reasoning behavior, and access controls. The archived clients send `max_tokens`, `temperature`, and-in several calls-`top_p`. OpenAI documents `max_tokens` as deprecated in favor of `max_completion_tokens`. The validator intentionally tests the parameters that the source actually sends; it does not hide a mismatch by using a different request shape. [API parameter reference](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create)
 
-## Step 3: start the three containers
+## Step 3: start the development container
 
-From the **host task directory**, run:
+From the **host task directory**, start the `lab` service defined in the supplied [Compose file](../scripts/introduction/docker-compose.yaml):
 
 ```bash
-podman compose up -d
+podman compose up -d lab
 podman compose ps
 ```
 
-The first run downloads images, prepares the supplied Python workspace image, and installs the requested dependencies. Subsequent starts reuse that image unless it needs rebuilding. This command uses the provided configuration; no manual Dockerfile or Compose authoring is required.
+**Expected:** the `lab` service is running with container name `agentic-lab`. This Compose definition contains only the development container. Do not expect local `opensearch` or `dashboards` services.
 
-**Expected:** three services-`opensearch`, `dashboards`, and `lab`-are running. Their container names are `opensearch-single`, `opensearch-single-dashboards`, and `agentic-lab`. Health status may show `starting` initially. Starting a container is not the same as its application being ready, so the validation step also waits for readiness.
+The first run downloads the supplied development image when it is not already available. The image contains the lab code, configuration, Python environment, and dependencies. Starting the container does not prove that its external dependencies are reachable; validate the workspace in Step 5 and inspect the hosted corpora in Tasks 2 and 3.
 
-Inspect a failing service without printing environment variables:
+Inspect a failing workspace without printing environment variables:
 
 ```bash
-podman compose logs --tail 80 opensearch
-podman compose logs --tail 80 dashboards
 podman compose logs --tail 80 lab
 ```
+
+**Expected:** recent workspace logs, or no lines if the container has not emitted any. Use any reported startup error to identify the failed component before continuing.
 
 ### Understand the network
 
 | Destination | From your host | From inside `lab` |
 |---|---|---|
-| OpenSearch REST API | `http://localhost:9200` | `http://opensearch-single:9200` |
-| OpenSearch Dashboards | `http://localhost:5601` | `http://opensearch-single-dashboards:5601` |
+| OpenSearch hosted by Instaclustr | Remote service; no local OpenSearch port is published. | The hosted endpoint configured in the supplied workspace. |
 | Runtime readiness | Not published to the host | `http://lab:8088/healthz` |
-| Future Orchestrator API | `http://localhost:10000` | `http://127.0.0.1:10000` |
+| Future Orchestrator API | Not published to the host | `http://127.0.0.1:10000` |
 | External inference | Not used by the host in this path | Your configured HTTPS API base URL |
 
-Inside a container, `localhost` refers to that container. Therefore, `OPENSEARCH_HOST` is `opensearch-single`, not `localhost`. Later, the specialists, their MCP servers, and the Orchestrator all run inside the **same** `lab` container, so their existing loopback addresses remain valid. Publishing port `10000` reserves access for a later task; no Orchestrator listens there yet.
+Inside a container, `localhost` refers to that container, not the hosted OpenSearch instance. Later, the specialists, their MCP servers, the Orchestrator, and the client all run inside the **same** `lab` container, so their existing loopback addresses remain valid. Run their probes inside that workspace. No Orchestrator listens on port `10000` until its task starts the process.
 
 ## Step 4: enter the Python workspace
 
@@ -272,7 +250,11 @@ Run **inside the container**:
 python /opt/lab/validate_setup.py
 ```
 
-The validator checks Python and the requested package versions, imports the ML dependencies, checks the three agent configurations in separate Python processes, and verifies governance remains enabled. It connects to OpenSearch, accepts green or yellow health for this single-node lab, and performs a temporary Lucene HNSW vector-index round trip. It deletes that temporary index afterward. It also checks Dashboards readiness and the workspace's private health endpoint.
+**Expected:** exit `0` and `READY FOR TASK 2` after the required checks pass. Review warnings and resolve failures before continuing. The exact check list and output come from the validator supplied in the development image, not from a validation script in this source archive.
+
+The validator checks Python and the requested package versions, imports the ML dependencies, checks the three agent configurations in separate Python processes, and verifies governance remains enabled. For the default workshop path, the environment is one local workspace plus hosted OpenSearch, not a local database/Dashboards stack. The Step 2 corpus-inspection probes in Tasks 2 and 3 use each agent's configured OpenSearch client to inspect counts, mappings, and coverage without creating or changing indices. Complete those checks before initializing retrieval against the prepared corpus.
+
+If a validator still requires local OpenSearch or Dashboards, treat that as a workspace-image/runtime mismatch and follow the [setup troubleshooting](../troubleshooting/introduction.md). Do not start extra database containers or modify the hosted corpus to satisfy an outdated check.
 
 For inference, it captures the real model-call parameters from the repository's clients without sending their original prompts. It then submits a short readiness prompt using each distinct request profile. Both ORCH and LLM roles are covered, including different parameters used by the specialists and Orchestrator. **These are paid model calls.** By default, each probe has an output/reasoning ceiling of 512 tokens and no automatic network retries. Identical request profiles are tested once.
 
@@ -281,9 +263,6 @@ An illustrative successful run ends with:
 ```text
 [PASS] Python: 3.12.x on Linux/...
 [PASS] Dependencies: ...
-[PASS] OpenSearch: ... cluster green ...
-[PASS] OpenSearch vector read/write: ...
-[PASS] OpenSearch Dashboards: ...
 [PASS] User container: ...
 [PASS] Model: ...
 [WARN] Full output ceilings: ...
@@ -307,11 +286,15 @@ For an infrastructure-only check without model API charges:
 python /opt/lab/validate_setup.py --skip-models
 ```
 
+**Expected:** the infrastructure checks run without model API probes. Exit `2` indicates that model checks were deliberately skipped; it is not readiness to continue to the agent tasks.
+
 To also download/cache the embedding model and validate a finite, normalized vector using the repository's own embedding wrapper:
 
 ```bash
 python /opt/lab/validate_setup.py --check-embeddings
 ```
+
+**Expected:** the embedding check loads the configured query model and verifies a finite, normalized vector, in addition to the regular checks. This does not ingest documents or rebuild the hosted corpus.
 
 The first embedding check can take several minutes and requires disk space for the weights. Later checks reuse the cache. This option is useful before Task 2; a normal successful run verifies package imports but does not claim that model weights have already been downloaded.
 
@@ -320,31 +303,37 @@ The first embedding check can take several minutes and requires disk space for t
 
 ## Pause or stop the lab
 
-Exit container shells, then run these commands from the **host task directory**.
+Exit container shells, then run these commands from the **host task directory**. These commands affect the local development container, not the corpora hosted by Instaclustr.
 
-To stop the services while keeping their containers and data:
+To stop the workspace while keeping the container's writable layer:
 
 ```bash
-podman compose stop
+podman compose stop lab
 ```
+
+**Expected:** `lab` stops. Any foreground application processes stop with it.
 
 To resume:
 
 ```bash
-podman compose start
+podman compose start lab
 ```
 
-To remove the containers and network while preserving named volumes:
+**Expected:** the existing workspace container starts. Re-enter it and restart the agent/MCP processes needed for the later tasks.
+
+To remove the local container and Compose network, preserve any local changes and audit files first:
 
 ```bash
 podman compose down
 ```
 
-Run `podman compose up -d` to recreate them.
+**Expected:** the local workspace container is removed; the hosted corpora are unaffected. The supplied Compose definition does not mount persistent workspace or audit storage.
+
+Return to Step 3 to create the development container again.
 
 ## What you learned and what comes next
 
-You now have a shared network, a reproducible Python workspace, and separate configuration for planning and generation.
+You now have a Python workspace configured to access the hosted corpora, plus separate configuration for planning and generation. The next tasks verify each pre-populated corpus before retrieval; neither requires local database startup or ingestion.
 
 A successful Task 1 run means the infrastructure and model requests passed.
 

@@ -15,7 +15,7 @@ The practical sequence is:
 | Step | Activity | Checkpoint |
 |---|---|---|
 | 1 | Re-enter the development container.<br>Inspect the effective configuration. | The existing services and News Agent source are available. |
-| 2 | Inspect the preloaded corpus. | The news index is populated; its dates and vector mapping are visible. |
+| 2 | Inspect the pre-populated hosted corpus. | The news index is populated; its dates and vector mapping are visible. |
 | 3 | Retrieve historical evidence directly. | Query embeddings return identifiable article chunks. |
 | 4 | Start and test Tavily through MCP. | The bounded news tool returns source records or a diagnosable error. |
 | 5 | Start the News Expert. | Its health endpoint and Agent Card respond. |
@@ -57,17 +57,19 @@ In this lab, we default to OpenAI and configure both roles with `gpt-5.4`. Its o
 
 ## Before you begin
 
-Complete Task 1 and its model validation first. You need the existing `lab`, `opensearch`, and `dashboards` services, working external inference credentials, and a [Tavily API key](https://www.tavily.com/). Real-time search probes and normal expert requests use external services and may incur charges. Direct historical retrieval uses the local embedding model and OpenSearch.
+Complete Task 1 and its model validation first. You need the existing `lab` development container, access to the pre-populated news corpus on OpenSearch hosted by Instaclustr, working external inference credentials, and a [Tavily API key](https://www.tavily.com/). Real-time search probes and normal expert requests use external services and may incur charges. Direct historical retrieval uses the local embedding model and OpenSearch.
 
 ## Step 1: enter the existing workspace
 
-It's expected that the 3 containers from the Task 1 are still running. If they aren't, please revisit that Task to start them.
+The `lab` development container from Task 1 must still be running. If it is not, return to [Task 1, Step 3](introduction.md#step-3-start-the-development-container). No local OpenSearch or Dashboards container is required.
 
-Open three host terminal windows. In each, enter the same development container by running the following command:
+Open three host terminal windows. From the host `scripts/introduction` directory containing the Compose file, enter the same development container in each:
 
 ```bash
 podman compose exec lab bash
 ```
+
+**Expected:** a shell in the existing `lab` container, not a new container.
 
 Then run **inside each container shell**:
 
@@ -75,6 +77,8 @@ Then run **inside each container shell**:
 cd /workspace/agentic-rag/2-news-agent
 pwd
 ```
+
+**Expected:** the working directory is the News Expert directory inside the supplied workspace; its legacy `2-news-agent` path resolves to the existing source.
 
 Use these terminal names throughout the task:
 
@@ -90,12 +94,11 @@ These are three shells in one container, not three additional containers. An exp
 
 | Component | Address used inside `lab` | Access from the host |
 |---|---|---|
-| OpenSearch | `http://opensearch-single:9200` | `http://localhost:9200` |
-| OpenSearch Dashboards | `http://opensearch-single-dashboards:5601` | `http://localhost:5601` |
+| OpenSearch hosted by Instaclustr | The hosted endpoint configured for the News Expert. | Remote service; no local OpenSearch port is published. |
 | Tavily MCP | `http://127.0.0.1:8765/mcp` | Not published by the supplied Compose file. |
 | News Expert | `http://127.0.0.1:9001` | Not published by the supplied Compose file. |
 
-OpenSearch is in a different container, so its address is not `localhost` from the development shell. The News Expert and its MCP server run in the same container, so their loopback addresses are correct. Keep their checks inside `lab`.
+OpenSearch is hosted outside the development container. Use the News Expert's configured client rather than a local database URL. The News Expert and its MCP server run in the same container, so their loopback addresses are correct. Keep their checks inside `lab`.
 
 Let's inspect the effective configuration as it relates to our News Expert.
 
@@ -126,34 +129,59 @@ for label, value in (
 PY
 ```
 
-**Expected:** OpenSearch points to `opensearch-single:9200`; the index is `techcomp-vector-chunks`; the models match Task 1's selected profile; all three check categories and model review are enabled; correction attempts are `1`; raw-query auditing is `False`. The default embedding model is `Qwen/Qwen3-Embedding-0.6B`.
+**Expected:** OpenSearch points to the configured Instaclustr-hosted instance; the displayed news index is the pre-populated corpus used by this workspace (the source default is `agenticrag-technews-vector-chunks`); the models match Task 1's selected profile; all three check categories and model review are enabled; correction attempts are `1`; raw-query auditing is `False`. The default embedding model is `Qwen/Qwen3-Embedding-0.6B`.
 
 This command prints selected settings, not credentials. Avoid publishing a full environment dump, `docker inspect`, or expanded Compose configuration.
 
-**Do not change the embedding model to obtain a faster first run.** Query vectors must use the same embedding space as the preloaded document vectors. A matching dimension is necessary but does not establish that two different models are compatible. The source defines the default; the live index inspection in Step 3 checks the actual mapping. The provided files do not contain an image-build manifest that independently certifies its embedding model and corpus cutoff.
+**Do not change the embedding model to obtain a faster first run.** Query vectors must use the same embedding space as the preloaded document vectors. A matching dimension is necessary but does not establish that two different models are compatible. The source defines the default; the live index inspection in Step 2 checks the actual mapping. The provided files do not contain a corpus manifest that independently certifies the hosted data's embedding model and collection cutoff.
 
 ## Step 2: inspect the preloaded historical corpus
 
-> **Use the preloaded data.** The supplied OpenSearch image already contains the workshop's news vectors. Do **not** run `make ingest`, delete the index, or recreate it during this walkthrough. We will explain ingestion without repeating it. You also do not need to run `make install` or create another Python environment inside the development container.
+> **Use the pre-populated hosted data.** The workshop's news corpus and document vectors are already populated on an OpenSearch instance hosted by Instaclustr. Do **not** run `make ingest`, delete the index, or recreate it during this walkthrough. We will explain ingestion without repeating it. You also do not need to run `make install` or create another Python environment inside the development container. Ingestion is still required for the separate [native setup](../references/NATIVE_SETUP.md#native-only-ingestion-for-tasks-2-and-3).
 
-Historical RAG means retrieving from the corpus available to this application, not asking the generation model to remember an article. Inspect that corpus before asking it questions.
+Historical RAG means retrieving from the corpus available to this application, not asking the generation model to remember an article. Inspect that corpus before asking it questions. These read-only probes use [`load_settings()`](../scripts/news-agent/src/common/config.py) and [`create_client()`](../scripts/news-agent/src/common/opensearch_client.py), so they use the same connection configuration and index as the News Expert.
 
 **Terminal C:**
 
 ```bash
-curl --fail --silent --show-error \
-  'http://opensearch-single:9200/techcomp-vector-chunks/_count' \
-  | python -m json.tool
+python - <<'PY'
+import json
+from src.common.config import load_settings
+from src.common.opensearch_client import create_client
+
+s = load_settings()
+client = create_client(s)
+try:
+    count = client.count(index=s.opensearch_index)["count"]
+    print(json.dumps({"index": s.opensearch_index, "count": count}, indent=2))
+    if count == 0:
+        raise SystemExit("The pre-populated news index is empty. Stop before retrieval.")
+finally:
+    client.close()
+PY
 ```
 
-**Expected:** `count` is greater than zero. It counts indexed **chunks**, not distinct articles. A 404 or zero count means the preloaded corpus is not available as expected. Check the image tag, container logs, and configured index before continuing. Do not use ingestion or index deletion as a repair step.
+**Expected:** `count` is greater than zero. It counts indexed **chunks**, not distinct articles. A missing-index error or zero count means the hosted corpus is not available as expected. Check the effective index and hosted-service access with the workshop maintainer before continuing. Do not use ingestion or index deletion as a repair step.
 
 Inspect the vector field:
 
 ```bash
-curl --fail --silent --show-error \
-  'http://opensearch-single:9200/techcomp-vector-chunks/_mapping?filter_path=*.mappings.properties.embedding' \
-  | python -m json.tool
+python - <<'PY'
+import json
+from src.common.config import load_settings
+from src.common.opensearch_client import create_client
+
+s = load_settings()
+client = create_client(s)
+try:
+    mapping = client.indices.get_mapping(index=s.opensearch_index)
+    print(json.dumps({
+        name: details["mappings"]["properties"].get("embedding")
+        for name, details in mapping.items()
+    }, indent=2))
+finally:
+    client.close()
+PY
 ```
 
 **Expected:** the `embedding` field is a `knn_vector` with a dimension and a method identifying `hnsw`, `lucene`, and `cosinesimil`. Use the returned dimension rather than guessing one.
@@ -192,19 +220,11 @@ finally:
 PY
 ```
 
-**Observe:** article titles, publisher information, dates, original URLs when available, and a locator back to a CSV record and chunk. Several chunks can share an article title. The displayed text is deliberately shortened for inspection.
+**Expected:** article titles, publisher information, dates, original URLs when available, and a locator back to a CSV record and chunk. Several chunks can share an article title. The displayed text is deliberately shortened for inspection.
 
 The maximum publication date is the latest **dated record present**, not proof of complete coverage through that date. Missing dates, gaps in company coverage, and a snapshot's collection date are separate issues. A date embedded in a CSV filename is not sufficient to establish a hard cutoff. Remember this distinction when interpreting "current" answers.
 
-For a graphical inspection, open `http://localhost:5601` in your **host browser**, open **Dev Tools**, and run:
-
-```http
-GET techcomp-vector-chunks/_count
-
-GET techcomp-vector-chunks/_mapping
-```
-
-These inspect the same index. Dashboards is an observation tool here, not an extra retrieval path used by the expert.
+The probes above inspect the same hosted index used by the expert. No local Dashboards instance is needed.
 
 ### What ingestion already did
 
@@ -229,7 +249,7 @@ Read [Chunking Strategies for the News Expert](../concepts/CHUNKING_STRATEGIES.m
 
 ## Step 3: retrieve historical evidence without generating an answer
 
-Before involving a planner or generator, verify the historical retrieval layer on its own.
+Before involving a planner or generator, verify the historical retrieval layer on its own. Complete Step 2 first: the retriever calls [`ensure_index()`](../scripts/news-agent/src/common/opensearch_client.py) during initialization, which can create an absent index or add missing metadata mappings. Do not use that behavior to provision or repair the hosted workshop corpus; stop and resolve failed corpus checks with the workshop maintainer before starting retrieval.
 
 **Terminal C:**
 
