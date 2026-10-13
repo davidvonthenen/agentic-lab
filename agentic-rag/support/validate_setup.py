@@ -508,8 +508,8 @@ def main() -> int:
     #     health = wait_json(base + "/_cluster/health", cluster_ready, seconds=args.wait_seconds)
     #     info = json_request(base)
     #     version = info.get("version", {}).get("number")
-    #     if version != "3.5.0":
-    #         raise CheckError(f"Expected OpenSearch 3.5.0, received {version!r}.")
+    #     if version != "3.6.0":
+    #         raise CheckError(f"Expected OpenSearch 3.6.0, received {version!r}.")
     #     return f"{base}; version {version}; cluster {health['status']}. Yellow is acceptable for a single-node lab."
     # os_ok = validator.run("OpenSearch", opensearch_check)
     # if os_ok:
@@ -518,9 +518,9 @@ def main() -> int:
     # def dashboard_check() -> str:
     #     data = wait_json(dashboard_base + "/api/status", dashboards_ready, seconds=args.wait_seconds)
     #     version = data.get("version", {}).get("number")
-    #     if version != "3.5.0":
-    #         raise CheckError(f"Expected Dashboards 3.5.0, received {version!r}.")
-    #     return "Dashboards 3.5.0 reports available/green, including its OpenSearch connection."
+    #     if version != "3.6.0":
+    #         raise CheckError(f"Expected Dashboards 3.6.0, received {version!r}.")
+    #     return "Dashboards 3.6.0 reports available/green, including its OpenSearch connection."
     # validator.run("OpenSearch Dashboards", dashboard_check)
     # if args.native:
     #     validator.record("User container", "SKIP", "Not applicable to native Python mode.")
