@@ -20,7 +20,7 @@ class Settings:
     opensearch_port: int = 9200
     opensearch_user: str = ""
     opensearch_password: str = ""
-    opensearch_ssl: bool = True
+    opensearch_ssl: bool = False
     opensearch_index: str = "agenticrag-technews-vector-chunks"
 
     # Embeddings and retrieval
@@ -86,12 +86,12 @@ class Settings:
 
 def _get_str(name: str, default: str) -> str:
     value = os.getenv(name)
-    return default if value is None or value == "" else value.strip()
+    return default if value is None or value.strip() == "" else value.strip()
 
 
 def _get_int(name: str, default: int) -> int:
     value = os.getenv(name)
-    if value is None or value == "":
+    if value is None or value.strip() == "":
         return default
     try:
         return int(value)
@@ -101,7 +101,7 @@ def _get_int(name: str, default: int) -> int:
 
 def _get_float(name: str, default: float) -> float:
     value = os.getenv(name)
-    if value is None or value == "":
+    if value is None or value.strip() == "":
         return default
     try:
         return float(value)

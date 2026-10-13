@@ -10,6 +10,8 @@ ai_media_dataset_20250911-1000lines.csv
 quarterly_filings
 agentic-rag/support/opensearch
 agentic-rag/support/commands.txt
+opensearch-users.csv
+.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

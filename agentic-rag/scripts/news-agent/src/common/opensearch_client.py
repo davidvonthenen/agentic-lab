@@ -4,7 +4,7 @@
 """OpenSearch helpers for the historical technology-news corpus."""
 from __future__ import annotations
 
-from typing import Any, Optional, Sequence
+from typing import Any, List, Optional, Sequence
 
 from opensearchpy import OpenSearch
 from opensearchpy.exceptions import NotFoundError
@@ -17,13 +17,19 @@ LOGGER = get_logger(__name__)
 
 def create_client(settings: Settings) -> Any:
     """Create an OpenSearch client using configured authentication and TLS."""
-    ssl = bool(settings.opensearch_ssl)
+    ssl = True
+    ssl_cert = bool(settings.opensearch_ssl)
     http_auth = (
         (settings.opensearch_user, settings.opensearch_password)
         if settings.opensearch_user and settings.opensearch_password
         else None
     )
 
+    # LOGGER.info(
+    #     "Connecting to OpenSearch at %s:%s",
+    #     settings.opensearch_host,
+    #     settings.opensearch_port,
+    # )
     return OpenSearch(
         hosts=[
             {
@@ -35,8 +41,8 @@ def create_client(settings: Settings) -> Any:
         http_compress=True,
         http_auth=http_auth,
         use_ssl=ssl,
-        verify_certs=ssl,
-        ssl_assert_hostname=False if not ssl else None,
+        verify_certs=ssl_cert,
+        ssl_assert_hostname=False if not ssl_cert else None,
         ssl_show_warn=ssl,
     )
 

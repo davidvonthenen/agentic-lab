@@ -22,8 +22,10 @@ class Settings:
     opensearch_port: int = 9200
     opensearch_user: str = ""
     opensearch_password: str = ""
-    opensearch_ssl: bool = True
+    opensearch_ssl: bool = False
     opensearch_index: str = "agenticrag-finfile-vector-chunks"
+
+    # Embeddings and retrieval
     embedding_model: str = "Qwen/Qwen3-Embedding-0.6B"
     rag_top_k: int = 3
     rag_num_candidates: int = 3
@@ -111,16 +113,13 @@ def _get_bool(name: str, default: bool) -> bool:
 
 def _load_dotenv(env_file: str | None) -> None:
     if env_file:
-        load_dotenv(env_file)
+        load_dotenv(env_file, override=False)
         return
 
-    candidates = (
-        Path.cwd() / ".env",
-        Path(__file__).resolve().parents[2] / ".env",
-    )
-    for candidate in candidates:
+    project_root = Path(__file__).resolve().parents[2]
+    for candidate in (Path.cwd() / ".env", project_root / ".env"):
         if candidate.exists():
-            load_dotenv(candidate)
+            load_dotenv(candidate, override=False)
             return
 
 
