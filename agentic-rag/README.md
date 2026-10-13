@@ -36,7 +36,7 @@ These tasks are cumulative and build on top of one another leading up to the fin
 | **1. Introduction to our Agentic Researcher** | Review the architecture, prepare the Python environment, start OpenSearch, and validate the shared services required by the lab. | [Start](tasks/introduction.md) |
 | **2. News Expert** | Build a governed specialist that combines historical OpenSearch RAG with current technology news retrieved through Tavily MCP. | [Start](tasks/news-agent.md) |
 | **3. Financial Expert** | Build a governed specialist that combines exact-ticker SEC filing RAG with structured market data retrieved through Finnhub MCP. | [Start](tasks/financials-agent.md) |
-| **4. Orchestrator Expert** | Route one-company requests to the specialists over A2A, evaluate completion, and synthesize evidence without crossing authority boundaries. | [Start](tasks/orcheestrator-agent.md) |
+| **4. Orchestrator Expert** | Route one-company requests to the specialists over A2A, evaluate completion, and synthesize evidence without crossing authority boundaries. | [Start](tasks/orchestrator-agent.md) |
 | **5. Ask with our Client** | Use the OpenAI-compatible client to exercise news, financial, combined, clarification, and conversational follow-up flows. | [Start](tasks/client.md) |
 
 ## Getting Started

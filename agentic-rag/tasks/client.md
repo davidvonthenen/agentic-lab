@@ -21,7 +21,7 @@ The previous tasks assembled the lab's **Mixture of Experts (MoE)** solution. He
 
 ## Before you begin
 
-Complete Task 1's environment and model validation. Leave the services established in [Task 2](news-agent.md), [Task 3](financials-agent.md), and [Task 4](orcheestrator-agent.md) running.
+Complete Task 1's environment and model validation. Leave the services established in [Task 2](news-agent.md), [Task 3](financials-agent.md), and [Task 4](orchestrator-agent.md) running.
 
 The existing Compose environment must contain the `lab`, `opensearch`, and `dashboards` services.
 
@@ -87,7 +87,7 @@ The banner is the supplied application's label, not permission to provide invest
 
 [Implementation: client](../scripts/client/client.py)
 [Launch target](../scripts/client/Makefile)
-[HTTP boundary](../scripts/orcheestrator-agent/src/host_agent/__main__.py)
+[HTTP boundary](../scripts/orchestrator-agent/src/host_agent/__main__.py)
 
 ### ask the single research question
 
@@ -152,7 +152,7 @@ The trace is a summary, not a certificate. In particular, `policy=passed` is der
 
 A withholding or audit-failure notice can replace the normal response and omit this trace. Step 5 explains how to inspect candidate records without issuing another question.
 
-[Implementation: response traces and composition checks](../scripts/orcheestrator-agent/src/host_agent/routing_agent.py)
+[Implementation: response traces and composition checks](../scripts/orchestrator-agent/src/host_agent/routing_agent.py)
 
 ## Step 4: distinguish observability from successful execution
 
@@ -174,7 +174,7 @@ The **Orchestrator reinforcement loop** discussed in this lab is runtime feedbac
 
 The observation surfaces used here are terminal output and local JSONL audit files. The supplied Compose configuration does not ship these audit files into OpenSearch Dashboards or configure a distributed-tracing backend. Dashboards is not automatically a viewer for the request's audit history.
 
-[Implementation: HTTP response metadata](../scripts/orcheestrator-agent/src/host_agent/__main__.py)
+[Implementation: HTTP response metadata](../scripts/orchestrator-agent/src/host_agent/__main__.py)
 
 ## Step 5: follow this request through its audit records
 

@@ -20,8 +20,8 @@ class Settings:
     opensearch_port: int = 9200
     opensearch_user: str = ""
     opensearch_password: str = ""
-    opensearch_ssl: bool = False
-    opensearch_index: str = "techcomp-vector-chunks"
+    opensearch_ssl: bool = True
+    opensearch_index: str = "agenticrag-technews-vector-chunks"
 
     # Embeddings and retrieval
     embedding_model: str = "Qwen/Qwen3-Embedding-0.6B"

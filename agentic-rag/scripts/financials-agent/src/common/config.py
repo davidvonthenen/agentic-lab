@@ -22,8 +22,8 @@ class Settings:
     opensearch_port: int = 9200
     opensearch_user: str = ""
     opensearch_password: str = ""
-    opensearch_ssl: bool = False
-    opensearch_index: str = "financial-filings-vector-chunks"
+    opensearch_ssl: bool = True
+    opensearch_index: str = "agenticrag-finfile-vector-chunks"
     embedding_model: str = "Qwen/Qwen3-Embedding-0.6B"
     rag_top_k: int = 3
     rag_num_candidates: int = 3

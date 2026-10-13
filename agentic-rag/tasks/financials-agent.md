@@ -560,7 +560,7 @@ The financial-specific lessons are:
 
 These are responsibilities of the application around the model, not features gained by assigning the model a financial persona.
 
-Continue to [Task 4: Orchestrator Expert](orcheestrator-agent.md), or return to the [workshop task index](../README.md).
+Continue to [Task 4: Orchestrator Expert](orchestrator-agent.md), or return to the [workshop task index](../README.md).
 
 [Troubleshooting reference](../troubleshooting/financials-agent.md)
 
