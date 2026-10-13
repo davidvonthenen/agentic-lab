@@ -6,6 +6,9 @@ from __future__ import annotations
 
 from typing import Any, List, Optional, Sequence
 
+from opensearchpy import OpenSearch
+from opensearchpy.exceptions import NotFoundError
+
 from .config import Settings
 from .logging import get_logger, log_payload
 
@@ -14,20 +17,19 @@ LOGGER = get_logger(__name__)
 
 def create_client(settings: Settings):
     """Create an OpenSearch client using configured authentication and TLS."""
-    from opensearchpy import OpenSearch
-
-    ssl = bool(settings.opensearch_ssl)
+    ssl = True
+    ssl_cert = bool(settings.opensearch_ssl)
     http_auth = (
         (settings.opensearch_user, settings.opensearch_password)
         if settings.opensearch_user and settings.opensearch_password
         else None
     )
 
-    LOGGER.info(
-        "Connecting to OpenSearch at %s:%s",
-        settings.opensearch_host,
-        settings.opensearch_port,
-    )
+    # LOGGER.info(
+    #     "Connecting to OpenSearch at %s:%s",
+    #     settings.opensearch_host,
+    #     settings.opensearch_port,
+    # )
     return OpenSearch(
         hosts=[
             {
@@ -39,8 +41,8 @@ def create_client(settings: Settings):
         http_compress=True,
         http_auth=http_auth,
         use_ssl=ssl,
-        verify_certs=ssl,
-        ssl_assert_hostname=False if not ssl else None,
+        verify_certs=ssl_cert,
+        ssl_assert_hostname=False if not ssl_cert else None,
         ssl_show_warn=ssl,
     )
 
