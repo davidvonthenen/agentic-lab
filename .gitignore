@@ -6,6 +6,10 @@
 __pycache__/
 *.pyc
 validation-report*.json
+ai_media_dataset_20250911-1000lines.csv
+quarterly_filings
+agentic-rag/support/opensearch
+agentic-rag/support/commands.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
