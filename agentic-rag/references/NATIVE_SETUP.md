@@ -40,6 +40,26 @@ For Windows, create or select the WSL2 Ubuntu distribution following the [Micros
 
 For the WSL path, run Podman and its Compose provider in the same WSL distribution as Python, and execute the OpenSearch commands there. This keeps Python and the published OpenSearch port on the same Linux host rather than assuming that localhost crosses different Windows/WSL/Podman-machine environments. Use the [Podman installation instructions](https://podman.io/docs/installation) for that distribution and confirm `podman info` and `podman compose version` before continuing.
 
+### Set the OpenSearch kernel prerequisite
+
+OpenSearch requires the Linux kernel's `vm.max_map_count` to be at least `262144`. On Windows and macOS, configure the **Podman VM**, not the host operating system. [OpenSearch installation reference](https://docs.opensearch.org/latest/install-and-configure/install-opensearch/docker/)
+
+**Windows or macOS - host terminal:**
+
+```bash
+podman machine ssh "sudo sysctl -w vm.max_map_count=262144"
+podman machine ssh "sysctl vm.max_map_count"
+```
+
+**Linux with Podman running directly on the host:**
+
+```bash
+sudo sysctl -w vm.max_map_count=262144
+sysctl vm.max_map_count
+```
+
+**Expected:** `vm.max_map_count = 262144`, or a larger existing value. A temporary `sysctl -w` setting may need to be reapplied after restarting the VM or host. For a persistent Linux setting, an administrator can place `vm.max_map_count=262144` in a file under `/etc/sysctl.d/` and run `sudo sysctl --system` in the same Linux environment.
+
 ## 2. Create the Python 3.12 environment
 
 **Repository root:**
@@ -162,6 +182,34 @@ python scripts/introduction/native_verify_environment.py --services
 On Apple Silicon, model health should report `runtime: mlx`. On Linux/WSL2 it should report `runtime: gguf`. Then run the two completion examples in [Task 1, Step 6](../tasks/introduction.md) directly in this native shell. Skip the `podman exec` instruction; your model processes are running on the host.
 
 Keep the same environment active for subsequent tasks. You will use `OPENSEARCH_HOST=127.0.0.1`, not the container-only hostname `opensearch-single`, in those native agent processes.
+
+### Native-only ingestion for Tasks 2 and 3
+
+The default development-container walkthrough uses pre-populated corpora on OpenSearch hosted by Instaclustr and skips ingestion. **This native setup still requires `make ingest` for both agents** to prepare the corpora in your own OpenSearch instance. Run these commands only after native setup and OpenSearch connectivity have been verified. Do not run them against the shared hosted workshop indices.
+
+The source archive does not contain the datasets. Obtain the workshop inputs before continuing: the news CSV must be at `scripts/news-agent/ai_media_dataset_20250911-1000lines.csv`, and the text-converted filing `.md` files, with any metadata sidecars, must be under `scripts/financials-agent/quarterly_filings/`. These are the defaults used by the existing ingestion commands, not files supplied in this ZIP. Keep the same embedding model for ingestion and subsequent query retrieval.
+
+**Repository root, native Python environment active, and your own OpenSearch connection verified:**
+
+```bash
+(cd scripts/news-agent && make ingest)
+```
+
+**Expected:** the News Expert reports a positive article/chunk count and the target index after parsing the CSV, chunking articles, creating document embeddings, and indexing the source metadata. Counts depend on the supplied CSV. A missing input or connection error must be resolved before retrieval.
+
+[News Make target](../scripts/news-agent/Makefile) · [News ingestion implementation](../scripts/news-agent/src/ingest.py)
+
+From the same **repository root and native environment**, prepare the filing corpus:
+
+```bash
+(cd scripts/financials-agent && make ingest)
+```
+
+**Expected:** the Financial Expert logs a positive ingested-chunk count and the target index after discovering filings, retaining issuer/filing metadata, chunking, embedding, and indexing them. A missing input or a run with no filing chunks is not a completed corpus setup.
+
+[Financial Make target](../scripts/financials-agent/Makefile) · [Filing ingestion implementation](../scripts/financials-agent/src/ingest.py)
+
+Ingest each corpus before its corresponding task, then run [Task 2's corpus inspection](../tasks/news-agent.md#step-2-inspect-the-preloaded-historical-corpus) or [Task 3's corpus inspection](../tasks/financials-agent.md#step-2-inspect-the-preloaded-sec-corpus) from that agent's native source directory. Skip the container-entry commands and keep your native configuration active. Those read-only checks verify the indexed evidence before a generated answer depends on it. Rerun ingestion only when intentionally updating your own corpus, not as a routine retrieval or connection check.
 
 ## ONLY Upon completion of the lab
 

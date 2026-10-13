@@ -65,7 +65,7 @@ The completion model does **not** receive expert response prose or retrieved pas
 
 Complete Task 1's environment and model validation. Leave the services established in [Task 2](news-agent.md) and [Task 3](financials-agent.md) running.
 
-The existing Compose environment must contain the `lab`, `opensearch`, and `dashboards` services.
+The existing `lab` development container must remain running. The specialists use the pre-populated corpora on OpenSearch hosted by Instaclustr; no local OpenSearch or Dashboards service is required.
 
 ## Step 1: enter the existing workspace
 
@@ -140,8 +140,7 @@ This command prints selected settings, not API keys. Avoid publishing full envir
 | Orchestrator | `http://127.0.0.1:10000` | None. |
 | Existing News A2A service | `http://127.0.0.1:9001` | None. |
 | Existing Financial A2A service | `http://127.0.0.1:9002` | None. |
-| OpenSearch | `http://opensearch-single:9200` | Host loopback port `9200`; not queried by the Orchestrator. |
-| Dashboards | `http://opensearch-single-dashboards:5601` | Host loopback port `5601`; not queried by the Orchestrator. |
+| OpenSearch hosted by Instaclustr | The hosted endpoints configured for the specialists; not queried by the Orchestrator. | None; OpenSearch is not a local Compose service. |
 
 Keep the probes below inside `lab`. Binding the Python process to `0.0.0.0` does not publish its port to the host.
 

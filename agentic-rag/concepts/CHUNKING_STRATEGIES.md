@@ -8,11 +8,11 @@ Chunking determines which parts of an article can become independently retrievab
 
 This companion explains the workshop's existing implementation, then explores six approaches: fixed-size, semantic or boundary-aware, recursive, adaptive, context-enriched, and AI-driven dynamic chunking. **Only fixed-size splitting with metadata-enriched embedding input is implemented in the supplied ingestion pipeline.** The other approaches below are optional lab experiments, not configuration switches already supported by the expert.
 
-You do not need to run any of these experiments to complete Task 2. Its OpenSearch index is already populated. Do not recreate or overwrite `techcomp-vector-chunks`.
+You do not need to run any of these experiments to complete Task 2. Its news corpus and document embeddings are already populated on OpenSearch hosted by Instaclustr. Do not recreate or overwrite the configured workshop index (the source default is `agenticrag-technews-vector-chunks`). The local boundary exercises below do not access OpenSearch; optional ingestion experiments require a separate environment and an OpenSearch instance under your control.
 
 ## 1. Start with the actual pipeline
 
-In `news_agent/`, `make ingest` runs `python -m src.ingest`. The ingestion module reads a CSV snapshot, normalizes its article records, splits article text, embeds those chunks with contextual metadata, and indexes the results. The splitter is a Python function, not an operation performed by OpenSearch.
+For the [native setup](../references/NATIVE_SETUP.md#native-only-ingestion-for-tasks-2-and-3), the News Expert's [`make ingest`](../scripts/news-agent/Makefile) target runs `python -m src.ingest`. It is not a step in the default hosted-corpus walkthrough. The ingestion module reads a CSV snapshot, normalizes its article records, splits article text, embeds those chunks with contextual metadata, and indexes the results. The splitter is a Python function, not an operation performed by OpenSearch.
 
 | Implementation point | Location | Current behavior |
 |---|---|---|
@@ -468,14 +468,14 @@ For example, assign `spans = recursive_spans(text, 160)` first. Compare whether 
 
 ## 4. Experiment with actual ingestion only in a separate index
 
-The task needs no ingestion. This section is optional and requires an actual CSV file, sufficient disk/memory, and permission to create additional indices. The supplied source archive does not include the dataset itself. A file may be present in the development image, but check rather than assume a path:
+The default hosted-corpus task needs no ingestion. This section is optional and requires an actual CSV file, sufficient disk/memory, and an OpenSearch instance under your control with permission to create additional indices. Run it in a separate native environment, not the default workshop container connected to Instaclustr. The commands below use the existing configured connection, so a different index name alone does not select a different cluster. Confirm your independent target before running any write operation; never use the shared hosted workshop corpus for these experiments. See [native setup](../references/NATIVE_SETUP.md) for the alternative environment. The supplied source archive does not include the dataset itself. From the News Expert directory in that separate environment, check your input files and the available CLI options:
 
 ```bash
 find . -type f -name '*.csv'
 python -m src.ingest --help
 ```
 
-The archive's CLI defaults to `./ai_media_dataset_20250911-1000lines.csv`. That does not prove the file exists, that it was used to build the preloaded image, or that its filename expresses the corpus's latest publication date. The Makefile has no `ingest-recreate` target in this archive.
+The archive's CLI defaults to `./ai_media_dataset_20250911-1000lines.csv`. That does not prove the file exists, that it was used to populate the hosted corpus, or that its filename expresses the corpus's latest publication date. The Makefile has no `ingest-recreate` target in this archive.
 
 ### A guarded fixed-size experiment
 
