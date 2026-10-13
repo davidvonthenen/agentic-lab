@@ -1,4 +1,4 @@
-[Task 4: Orchestrator Expert](../tasks/orcheestrator-agent.md)
+[Task 4: Orchestrator Expert](../tasks/orchestrator-agent.md)
 
 ## Troubleshooting reference
 

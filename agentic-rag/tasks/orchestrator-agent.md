@@ -37,13 +37,13 @@ The Orchestrator supplies the coordination needed to make those boundaries usefu
 
 The Orchestrator needs to determine **what is being requested, which expert owns the work, whether further delegation is permitted, and what can be released**. It does not need a second copy of the domain corpus.
 
-![Orchestrator Architecture](../images/orcheestrator-agent/orchestrator-agent-architecture.png)
+![Orchestrator Architecture](../images/orchestrator-agent/orchestrator-agent-architecture.png)
 
 The Orchestrator has no direct OpenSearch, MCP, web-search, or market-data retrieval path. Shared environment variables do not change that execution path. When information is missing, it must work with an expert's result or limitation rather than query the underlying provider itself.
 
 This is an application boundary, not a security sandbox. The lab runs these processes in the same development container and supplies shared environment settings. The separation demonstrated here does not establish process isolation or per-expert credential isolation.
 
-[Implementation: runtime construction and execution](../scripts/orcheestrator-agent/src/host_agent/routing_agent.py)
+[Implementation: runtime construction and execution](../scripts/orchestrator-agent/src/host_agent/routing_agent.py)
 
 ### Separate control decisions from answer composition
 
@@ -59,7 +59,7 @@ The source names the control model **Nemotron** and the synthesis model **Qwen**
 
 The completion model does **not** receive expert response prose or retrieved passages. It receives status metadata. The synthesis model receives the response packages, but is instructed not to contribute facts from its own memory. This keeps the planning decision separate from domain answer generation.
 
-[Implementation: model prompts and payload construction](../scripts/orcheestrator-agent/src/host_agent/llm_client.py)
+[Implementation: model prompts and payload construction](../scripts/orchestrator-agent/src/host_agent/llm_client.py)
 
 ## Before you begin
 
@@ -145,7 +145,7 @@ This command prints selected settings, not API keys. Avoid publishing full envir
 
 Keep the probes below inside `lab`. Binding the Python process to `0.0.0.0` does not publish its port to the host.
 
-[Implementation: configuration loading](../scripts/orcheestrator-agent/src/host_agent/config.py)
+[Implementation: configuration loading](../scripts/orchestrator-agent/src/host_agent/config.py)
 
 ## Step 2: inspect the A2A delegation boundary
 
@@ -198,8 +198,8 @@ On return, the A2A adapter consumes task events and normalizes the selected resp
 
 The adapter uses an internal task stream. The Orchestrator's public HTTP endpoint still returns one non-streaming response. Those are separate protocol boundaries.
 
-[Implementation: delegation and normalization](../scripts/orcheestrator-agent/src/host_agent/remote_agent_connection.py)
-[Response contracts](../scripts/orcheestrator-agent/src/host_agent/models.py)
+[Implementation: delegation and normalization](../scripts/orchestrator-agent/src/host_agent/remote_agent_connection.py)
+[Response contracts](../scripts/orchestrator-agent/src/host_agent/models.py)
 
 ## Step 3: inspect routing before involving a model
 
@@ -215,7 +215,7 @@ The adapter uses an internal task stream. The Orchestrator's public HTTP endpoin
 
 A narrow route avoids unnecessary initial delegation and prevents unrelated expert output from becoming default context. A combined route joins two responsibilities; it does not merge their authority into a new unrestricted expert.
 
-![Routing Decisions](../images/orcheestrator-agent/routing-decisions.png)
+![Routing Decisions](../images/orchestrator-agent/routing-decisions.png)
 
 The input sequence is deterministic assessment, a structured model proposal when appropriate, schema/policy validation, and application-owned request construction. Unsupported requests, unresolved identity, and multi-identity ambiguity can bypass the planner entirely. A planner failure falls back to the deterministic plan rather than granting more authority.
 
@@ -320,9 +320,9 @@ After validation, `_canonicalize_specialist_requests()` replaces the model's del
 
 The same rule is not fully repeated at the later completion step. The next section makes that implementation limit explicit.
 
-[Implementation: assessment and initial-plan validation](../scripts/orcheestrator-agent/src/host_agent/policy_manager.py)
-[Fallback and canonical request construction](../scripts/orcheestrator-agent/src/host_agent/routing_agent.py)
-[Schema constraints](../scripts/orcheestrator-agent/src/host_agent/models.py)
+[Implementation: assessment and initial-plan validation](../scripts/orchestrator-agent/src/host_agent/policy_manager.py)
+[Fallback and canonical request construction](../scripts/orchestrator-agent/src/host_agent/routing_agent.py)
+[Schema constraints](../scripts/orchestrator-agent/src/host_agent/models.py)
 
 ## Step 4: understand the bounded orchestration loop
 
@@ -359,7 +359,7 @@ A failed stored-context continuation is retried only when it returns no text and
 
 A completed, failed, withheld, or evidence-limited expert result can all be terminal. A missing citation count is not an instruction to search an unrelated domain. The completion prompt tells the model to finish when the planned experts have returned terminal results and not to add another domain merely to conceal an evidence limit.
 
-![Output Validation and Release](../images/orcheestrator-agent/orchestrator-output.png)
+![Output Validation and Release](../images/orchestrator-agent/orchestrator-output.png)
 
 The deterministic completion validator enforces remaining budget, prevents repeat calls, and checks synthesis requirements for a finished combined route. It does **not** independently enforce every relevance instruction in the completion prompt.
 
@@ -412,8 +412,8 @@ The synthesis callback's citation validation is invoked even when the evidence s
 
 There is no separate final Nemotron review of the synthesized prose in this Orchestrator. Completion review happens earlier and sees status metadata. A failed enabled mechanical release check causes withholding; it does not start an additional general-purpose repair loop.
 
-[Implementation: synthesis validation and release checks](../scripts/orcheestrator-agent/src/host_agent/routing_agent.py)
-[Synthesis instructions and retry behavior](../scripts/orcheestrator-agent/src/host_agent/llm_client.py)
+[Implementation: synthesis validation and release checks](../scripts/orchestrator-agent/src/host_agent/routing_agent.py)
+[Synthesis instructions and retry behavior](../scripts/orchestrator-agent/src/host_agent/llm_client.py)
 
 ## Step 6: start the Orchestrator
 
@@ -425,8 +425,8 @@ make agent
 
 **Expected:** the log reports the configured bind address, normally `0.0.0.0:10000`, followed by Flask startup output. Startup alone does not contact every dependency, validate model credentials, or establish that a research request will succeed.
 
-[Implementation: Make targets](../scripts/orcheestrator-agent/Makefile)
-[HTTP request validation and response construction](../scripts/orcheestrator-agent/src/host_agent/__main__.py)
+[Implementation: Make targets](../scripts/orchestrator-agent/Makefile)
+[HTTP request validation and response construction](../scripts/orchestrator-agent/src/host_agent/__main__.py)
 
 ## Completion checkpoint
 
@@ -441,7 +441,7 @@ The central MoE lesson is that:
 
 Continue to [Task 5](client.md), or return to the [workshop task index](../README.md).
 
-[Troubleshooting reference](../troubleshooting/orcheestrator-agent.md)
+[Troubleshooting reference](../troubleshooting/orchestrator-agent.md)
 
-[Source map](../references/orcheestrator-agent.md)
+[Source map](../references/orchestrator-agent.md)
 
